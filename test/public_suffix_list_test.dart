@@ -2,6 +2,58 @@ import 'package:public_suffix/src/public_suffix_list.dart';
 import 'package:test/test.dart';
 
 void main() {
+  group('process_', () {
+    test('process_comments_remove', () {
+      var lines = <String>["//some comment", "//another comment"];
+
+      expect(PublicSuffixList.process(lines), hasLength(0));
+    });
+
+    test('emptyLines_remove', () {
+      var lines = <String>["", " ", " \t \t \t \t "];
+
+      expect(PublicSuffixList.process(lines), hasLength(0));
+    });
+
+    test('rules_dontRemove', () {
+      var lines = <String>["br", "nom.br", "*.br", "!br"];
+
+      expect(PublicSuffixList.process(lines), hasLength(4));
+    });
+
+    test('rules_removeTextAfterSpace', () {
+      var lines = <String>["br", "nom.br", "br2 and a comment", "*.br", "!br"];
+
+      expect(PublicSuffixList.process(lines),
+          containsAll(["br", "nom.br", "br2", "*.br", "!br"]));
+    });
+
+    test('mixed_removeCommentsEmptyAndTrailingText', () {
+      var lines = <String>[
+        "//some comment",
+        "br",
+        "  ",
+        "nom.br and more",
+      ];
+      var processed = PublicSuffixList.process(lines);
+
+      expect(processed, hasLength(2));
+      expect(processed, containsAll(["br", "nom.br"]));
+    });
+
+    test('mixed_dontAlterInputList', () {
+      var lines = <String>[
+        "//some comment",
+        "br",
+        "nom.br",
+        "//another comment"
+      ];
+
+      PublicSuffixList.process(lines);
+      expect(lines, hasLength(4));
+    });
+  });
+
   group('validate_', () {
     test('validRules_dontThrow', () {
       var lines = <String>[
@@ -20,26 +72,29 @@ void main() {
         "*.*",
         "!*.*",
         "*.nom.*",
-        "!*.nom.*",
-        "br and a comment",
-        "br and a co**ent"
+        "!*.nom.*"
       ];
 
       PublicSuffixList.validate(lines);
     });
 
-    test('commentsAndEmptyLines_dontThrow', () {
-      var lines = <String>[
-        "//br",
-        "//**",
-        "//.**",
-        "//!!.**",
-        "",
-        " ",
-        " \t \t \t \t ",
-      ];
+    test('comments_throw', () {
+      expect(() => PublicSuffixList.validate(["br", "//br"]),
+          throwsFormatException);
+    });
 
-      PublicSuffixList.validate(lines);
+    test('emptyLines_throw', () {
+      expect(
+          () => PublicSuffixList.validate(["br", ""]), throwsFormatException);
+      expect(
+          () => PublicSuffixList.validate(["br", " "]), throwsFormatException);
+      expect(() => PublicSuffixList.validate(["br", " \t \t \t \t "]),
+          throwsFormatException);
+    });
+
+    test('rulesWithTrailingText_throw', () {
+      expect(() => PublicSuffixList.validate(["br", "br and more"]),
+          throwsFormatException);
     });
 
     test('invalidRules_throw', () {
@@ -51,8 +106,7 @@ void main() {
     });
   });
 
-  group('hasInitialised_', ()
-  {
+  group('hasInitialised_', () {
     tearDown(() => PublicSuffixList.dispose());
 
     test('initialiseFirst_true', () {
@@ -87,9 +141,12 @@ void main() {
 
     test('modifyList_exception', () {
       PublicSuffixList.initFromList(["br", "nom.br"]);
-      expect(() => PublicSuffixList.suffixList.add("!br"), throwsUnsupportedError);
-      expect(() => PublicSuffixList.suffixList.removeLast(), throwsUnsupportedError);
-      expect(() => PublicSuffixList.suffixList[0] = "!br", throwsUnsupportedError);
+      expect(
+          () => PublicSuffixList.suffixList.add("!br"), throwsUnsupportedError);
+      expect(() => PublicSuffixList.suffixList.removeLast(),
+          throwsUnsupportedError);
+      expect(
+          () => PublicSuffixList.suffixList[0] = "!br", throwsUnsupportedError);
     });
   });
 }

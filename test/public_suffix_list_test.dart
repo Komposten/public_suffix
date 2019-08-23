@@ -149,4 +149,46 @@ void main() {
           () => PublicSuffixList.suffixList[0] = "!br", throwsUnsupportedError);
     });
   });
+
+  group('initFromList_', () {
+    test('listWithComments_commentsRemoved', () {
+      var lines = <String>["br", "//comment", "nom.br"];
+
+      PublicSuffixList.initFromList(lines);
+      expect(PublicSuffixList.suffixList, hasLength(2));
+      expect(PublicSuffixList.suffixList, containsAll(["br", "nom.br"]));
+    });
+
+    test('listWithEmptyLines_emptyLinesRemoved', () {
+      var lines = <String>["br", "", "nom.br", " ", " \t \t \t "];
+
+      PublicSuffixList.initFromList(lines);
+      expect(PublicSuffixList.suffixList, hasLength(2));
+      expect(PublicSuffixList.suffixList, containsAll(["br", "nom.br"]));
+    });
+
+    test('listWithRulesWithTrailingText_trailingTextRemoved', () {
+      var lines = <String>["br", "nom.br and more"];
+
+      PublicSuffixList.initFromList(lines);
+      expect(PublicSuffixList.suffixList, hasLength(2));
+      expect(PublicSuffixList.suffixList, containsAll(["br", "nom.br"]));
+    });
+
+    test('listWithInvalidRules_throw', () {
+      expect(
+          () => PublicSuffixList.initFromList([".br"]), throwsFormatException);
+    });
+  });
+
+  test('initFromString_mixedList_success', () {
+    var list = 'br'
+        '\nnom.br'
+        '\n//comment'
+        '\n*.com and such';
+
+    PublicSuffixList.initFromString(list);
+    expect(PublicSuffixList.suffixList, hasLength(3));
+    expect(PublicSuffixList.suffixList, containsAll(['br', 'nom.br', '*.com']));
+  });
 }

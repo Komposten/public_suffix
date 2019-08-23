@@ -25,7 +25,7 @@ class PublicSuffixList {
   /// [suffixListText] is expected to contain the contents of a suffix list across multiple lines,
   /// like the file at [publicsuffix.org](https://publicsuffix.org/list/public_suffix_list.dat).
   static void initFromString(String suffixListText) {
-    initFromList(suffixListText.split(RegExp(r"[\r\n]+")));
+    initFromList(suffixListText.split(RegExp(r'[\r\n]+')));
   }
 
   /// Initialises the suffix list.
@@ -99,12 +99,12 @@ class PublicSuffixList {
     }
   }
 
-  static bool _isEmpty(String line) => RegExp(r"^\s*$").hasMatch(line);
+  static bool _isEmpty(String line) => RegExp(r'^\s*$').hasMatch(line);
 
   static bool _isComment(String line) => line.trimLeft().startsWith('//');
 
   static bool _isValidRule(String line) =>
-      RegExp(r"^!?(?:\*|[^*.!\s][^*.!\s]*)(?:\.(?:[*]|[^*.\s]+))*$")
+      RegExp(r'^!?(?:\*|[^*.!\s][^*.!\s]*)(?:\.(?:[*]|[^*.\s]+))*$')
           .hasMatch(line);
 
   /// Disposes of the suffix list.

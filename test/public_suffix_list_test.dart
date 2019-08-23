@@ -4,49 +4,49 @@ import 'package:test/test.dart';
 void main() {
   group('process_', () {
     test('process_comments_remove', () {
-      var lines = <String>["//some comment", "//another comment"];
+      var lines = <String>['//some comment', '//another comment'];
 
       expect(PublicSuffixList.process(lines), hasLength(0));
     });
 
     test('emptyLines_remove', () {
-      var lines = <String>["", " ", " \t \t \t \t "];
+      var lines = <String>['', ' ', ' \t \t \t \t '];
 
       expect(PublicSuffixList.process(lines), hasLength(0));
     });
 
     test('rules_dontRemove', () {
-      var lines = <String>["br", "nom.br", "*.br", "!br"];
+      var lines = <String>['br', 'nom.br', '*.br', '!br'];
 
       expect(PublicSuffixList.process(lines), hasLength(4));
     });
 
     test('rules_removeTextAfterSpace', () {
-      var lines = <String>["br", "nom.br", "br2 and a comment", "*.br", "!br"];
+      var lines = <String>['br', 'nom.br', 'br2 and a comment', '*.br', '!br'];
 
       expect(PublicSuffixList.process(lines),
-          containsAll(["br", "nom.br", "br2", "*.br", "!br"]));
+          containsAll(['br', 'nom.br', 'br2', '*.br', '!br']));
     });
 
     test('mixed_removeCommentsEmptyAndTrailingText', () {
       var lines = <String>[
-        "//some comment",
-        "br",
-        "  ",
-        "nom.br and more",
+        '//some comment',
+        'br',
+        '  ',
+        'nom.br and more',
       ];
       var processed = PublicSuffixList.process(lines);
 
       expect(processed, hasLength(2));
-      expect(processed, containsAll(["br", "nom.br"]));
+      expect(processed, containsAll(['br', 'nom.br']));
     });
 
     test('mixed_dontAlterInputList', () {
       var lines = <String>[
-        "//some comment",
-        "br",
-        "nom.br",
-        "//another comment"
+        '//some comment',
+        'br',
+        'nom.br',
+        '//another comment'
       ];
 
       PublicSuffixList.process(lines);
@@ -57,52 +57,52 @@ void main() {
   group('validate_', () {
     test('validRules_dontThrow', () {
       var lines = <String>[
-        "br",
-        "!br",
-        "*",
-        "!*",
-        "mp.br",
-        "!mp.br",
-        "*.br",
-        "!*.br",
-        "mp.nom.br",
-        "!mp.nom.br",
-        "*.nom.br",
-        "!*.nom.br",
-        "*.*",
-        "!*.*",
-        "*.nom.*",
-        "!*.nom.*"
+        'br',
+        '!br',
+        '*',
+        '!*',
+        'mp.br',
+        '!mp.br',
+        '*.br',
+        '!*.br',
+        'mp.nom.br',
+        '!mp.nom.br',
+        '*.nom.br',
+        '!*.nom.br',
+        '*.*',
+        '!*.*',
+        '*.nom.*',
+        '!*.nom.*'
       ];
 
       PublicSuffixList.validate(lines);
     });
 
     test('comments_throw', () {
-      expect(() => PublicSuffixList.validate(["br", "//br"]),
+      expect(() => PublicSuffixList.validate(['br', '//br']),
           throwsFormatException);
     });
 
     test('emptyLines_throw', () {
       expect(
-          () => PublicSuffixList.validate(["br", ""]), throwsFormatException);
+          () => PublicSuffixList.validate(['br', '']), throwsFormatException);
       expect(
-          () => PublicSuffixList.validate(["br", " "]), throwsFormatException);
-      expect(() => PublicSuffixList.validate(["br", " \t \t \t \t "]),
+          () => PublicSuffixList.validate(['br', ' ']), throwsFormatException);
+      expect(() => PublicSuffixList.validate(['br', ' \t \t \t \t ']),
           throwsFormatException);
     });
 
     test('rulesWithTrailingText_throw', () {
-      expect(() => PublicSuffixList.validate(["br", "br and more"]),
+      expect(() => PublicSuffixList.validate(['br', 'br and more']),
           throwsFormatException);
     });
 
     test('invalidRules_throw', () {
-      expect(() => PublicSuffixList.validate([".br"]), throwsFormatException);
-      expect(() => PublicSuffixList.validate(["br."]), throwsFormatException);
-      expect(() => PublicSuffixList.validate(["**"]), throwsFormatException);
-      expect(() => PublicSuffixList.validate(["!!"]), throwsFormatException);
-      expect(() => PublicSuffixList.validate(["b..r"]), throwsFormatException);
+      expect(() => PublicSuffixList.validate(['.br']), throwsFormatException);
+      expect(() => PublicSuffixList.validate(['br.']), throwsFormatException);
+      expect(() => PublicSuffixList.validate(['**']), throwsFormatException);
+      expect(() => PublicSuffixList.validate(['!!']), throwsFormatException);
+      expect(() => PublicSuffixList.validate(['b..r']), throwsFormatException);
     });
   });
 
@@ -110,7 +110,7 @@ void main() {
     tearDown(() => PublicSuffixList.dispose());
 
     test('initialiseFirst_true', () {
-      PublicSuffixList.initFromList(["br"]);
+      PublicSuffixList.initFromList(['br']);
       expect(PublicSuffixList.hasInitialised(), isTrue);
     });
 
@@ -120,7 +120,7 @@ void main() {
   });
 
   test('dispose_initialiseFirst_uninitialise', () {
-    PublicSuffixList.initFromList(["br"]);
+    PublicSuffixList.initFromList(['br']);
     PublicSuffixList.dispose();
     expect(PublicSuffixList.hasInitialised(), isFalse);
   });
@@ -129,10 +129,10 @@ void main() {
     tearDown(() => PublicSuffixList.dispose());
 
     test('afterInitialising_returnList', () {
-      PublicSuffixList.initFromList(["br", "nom.br"]);
+      PublicSuffixList.initFromList(['br', 'nom.br']);
       expect(PublicSuffixList.suffixList, isNotNull);
       expect(PublicSuffixList.suffixList, hasLength(2));
-      expect(PublicSuffixList.suffixList, containsAllInOrder(["br", "nom.br"]));
+      expect(PublicSuffixList.suffixList, containsAllInOrder(['br', 'nom.br']));
     });
 
     test('beforeInitialising_returnNull', () {
@@ -140,53 +140,50 @@ void main() {
     });
 
     test('modifyList_exception', () {
-      PublicSuffixList.initFromList(["br", "nom.br"]);
+      PublicSuffixList.initFromList(['br', 'nom.br']);
       expect(
-          () => PublicSuffixList.suffixList.add("!br"), throwsUnsupportedError);
+          () => PublicSuffixList.suffixList.add('!br'), throwsUnsupportedError);
       expect(() => PublicSuffixList.suffixList.removeLast(),
           throwsUnsupportedError);
       expect(
-          () => PublicSuffixList.suffixList[0] = "!br", throwsUnsupportedError);
+          () => PublicSuffixList.suffixList[0] = '!br', throwsUnsupportedError);
     });
   });
 
   group('initFromList_', () {
     test('listWithComments_commentsRemoved', () {
-      var lines = <String>["br", "//comment", "nom.br"];
+      var lines = <String>['br', '//comment', 'nom.br'];
 
       PublicSuffixList.initFromList(lines);
       expect(PublicSuffixList.suffixList, hasLength(2));
-      expect(PublicSuffixList.suffixList, containsAll(["br", "nom.br"]));
+      expect(PublicSuffixList.suffixList, containsAll(['br', 'nom.br']));
     });
 
     test('listWithEmptyLines_emptyLinesRemoved', () {
-      var lines = <String>["br", "", "nom.br", " ", " \t \t \t "];
+      var lines = <String>['br', '', 'nom.br', ' ', ' \t \t \t '];
 
       PublicSuffixList.initFromList(lines);
       expect(PublicSuffixList.suffixList, hasLength(2));
-      expect(PublicSuffixList.suffixList, containsAll(["br", "nom.br"]));
+      expect(PublicSuffixList.suffixList, containsAll(['br', 'nom.br']));
     });
 
     test('listWithRulesWithTrailingText_trailingTextRemoved', () {
-      var lines = <String>["br", "nom.br and more"];
+      var lines = <String>['br', 'nom.br and more'];
 
       PublicSuffixList.initFromList(lines);
       expect(PublicSuffixList.suffixList, hasLength(2));
-      expect(PublicSuffixList.suffixList, containsAll(["br", "nom.br"]));
+      expect(PublicSuffixList.suffixList, containsAll(['br', 'nom.br']));
     });
 
     test('listWithInvalidRules_throw', () {
       expect(
-          () => PublicSuffixList.initFromList([".br"]), throwsFormatException);
+          () => PublicSuffixList.initFromList(['.br']), throwsFormatException);
     });
   });
 
   test('initFromString_mixedList_success', () {
-    var list = 'br'
-        '\nnom.br'
-        '\n//comment'
-        '\n*.com and such';
-
+    var list = 'br\nnom.br\n//comment\n*.com and such\n';
+    
     PublicSuffixList.initFromString(list);
     expect(PublicSuffixList.suffixList, hasLength(3));
     expect(PublicSuffixList.suffixList, containsAll(['br', 'nom.br', '*.com']));

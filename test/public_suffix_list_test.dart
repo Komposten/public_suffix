@@ -3,7 +3,7 @@ import 'package:test/test.dart';
 
 void main() {
   group('process_', () {
-    test('process_comments_remove', () {
+    test('comments_remove', () {
       var lines = <String>['//some comment', '//another comment'];
 
       expect(PublicSuffixList.process(lines), hasLength(0));
@@ -19,6 +19,13 @@ void main() {
       var lines = <String>['br', 'nom.br', '*.br', '!br'];
 
       expect(PublicSuffixList.process(lines), hasLength(4));
+    });
+
+    test('mixedCaseRules_changeToLowerCase', () {
+      var lines = <String>['bR', 'NOM.br', '*.br', '!BR'];
+
+      expect(PublicSuffixList.process(lines),
+          containsAll(['br', 'nom.br', '*.br', '!br']));
     });
 
     test('rules_removeTextAfterSpace', () {
@@ -183,7 +190,7 @@ void main() {
 
   test('initFromString_mixedList_success', () {
     var list = 'br\nnom.br\n//comment\n*.com and such\n';
-    
+
     PublicSuffixList.initFromString(list);
     expect(PublicSuffixList.suffixList, hasLength(3));
     expect(PublicSuffixList.suffixList, containsAll(['br', 'nom.br', '*.com']));

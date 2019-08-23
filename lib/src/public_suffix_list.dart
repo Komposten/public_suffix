@@ -47,6 +47,9 @@ class PublicSuffixList {
   /// the part of a line _before_ the first whitespace character, any text that
   /// follows after this is also removed.
   ///
+  /// Finally, all lines are changed to lower case to ease case-insensitive
+  /// comparisons later.
+  ///
   /// The resulting list is returned as a new instance, so that the original
   /// [suffixListLines] remains untouched.
   static List<String> process(List<String> suffixListLines) {
@@ -60,7 +63,7 @@ class PublicSuffixList {
           line = line.substring(0, firstSpace).trim();
         }
 
-        newList.add(line);
+        newList.add(line.toLowerCase());
       }
     }
 

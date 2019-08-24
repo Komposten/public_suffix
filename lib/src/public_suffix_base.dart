@@ -67,12 +67,12 @@ class PublicSuffix {
     _parseUri(sourceUri, SuffixRules.rules);
   }
 
-  void _parseUri(Uri uri, List<String> suffixList) {
+  void _parseUri(Uri uri, List<Rule> suffixList) {
     var host = _decodeHost(uri);
     var matchingRules = _findMatchingRules(host, suffixList);
     var prevailingRule = _getPrevailingRule(matchingRules);
 
-    if (prevailingRule.startsWith('!')) {
+    if (prevailingRule.isException) {
       prevailingRule = _trimExceptionRule(prevailingRule);
     }
 
@@ -110,8 +110,8 @@ class PublicSuffix {
     return host;
   }
 
-  _findMatchingRules(String host, List<String> suffixList) {
-    var matches = <String>[];
+  List<Rule> _findMatchingRules(String host, List<Rule> suffixList) {
+    var matches = <Rule>[];
 
     for (var rule in suffixList) {
       if (_ruleMatches(rule, host)) {
@@ -122,9 +122,9 @@ class PublicSuffix {
     return matches;
   }
 
-  bool _ruleMatches(String rule, String host) {
+  bool _ruleMatches(Rule rule, String host) {
     var hostParts = host.split(".");
-    var ruleParts = rule.split(".");
+    var ruleParts = rule.labels.split(".");
 
     hostParts.removeWhere((e) => e.isEmpty);
 
@@ -139,8 +139,7 @@ class PublicSuffix {
         var hostPart = hostParts[h];
 
         if (rulePart != '*' &&
-            rulePart != hostPart &&
-            rulePart != "!$hostPart") {
+            rulePart != hostPart) {
           matches = false;
           break;
         }
@@ -155,16 +154,16 @@ class PublicSuffix {
     return matches;
   }
 
-  String _getPrevailingRule(List<String> matchingRules) {
-    String prevailing;
+  Rule _getPrevailingRule(List<Rule> matchingRules) {
+    Rule prevailing;
     int longestLength = 0;
 
-    for (String rule in matchingRules) {
-      if (rule.startsWith('!')) {
+    for (Rule rule in matchingRules) {
+      if (rule.isException) {
         prevailing = rule;
         break;
       } else {
-        var ruleLength = '.'.allMatches(rule).length + 1;
+        var ruleLength = '.'.allMatches(rule.labels).length + 1;
         if (ruleLength > longestLength) {
           longestLength = ruleLength;
           prevailing = rule;
@@ -172,15 +171,18 @@ class PublicSuffix {
       }
     }
 
-    return prevailing ?? '*';
+    return prevailing ?? Rule('*', isIcann: true);
   }
 
-  String _trimExceptionRule(String prevailingRule) {
-    return prevailingRule.substring(prevailingRule.indexOf('.') + 1);
+  Rule _trimExceptionRule(Rule prevailingRule) {
+    var labels = prevailingRule.labels;
+    labels = labels.substring(labels.indexOf('.') + 1);
+
+    return Rule(labels, isIcann: prevailingRule.isIcann);
   }
 
-  String _getPublicSuffix(String host, String prevailingRule) {
-    var ruleLength = '.'.allMatches(prevailingRule).length + 1;
+  String _getPublicSuffix(String host, Rule prevailingRule) {
+    var ruleLength = '.'.allMatches(prevailingRule.labels).length + 1;
 
     var index = host.length;
     for (int i = 0; i < ruleLength; i++) {

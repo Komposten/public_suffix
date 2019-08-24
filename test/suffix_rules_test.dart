@@ -25,14 +25,21 @@ void main() {
       var lines = <String>['bR', 'NOM.br', '*.br', '!BR'];
 
       expect(SuffixRules.process(lines),
-          containsAll(['br', 'nom.br', '*.br', '!br']));
+          containsAll([Rule('br'), Rule('nom.br'), Rule('*.br'), Rule('!br')]));
     });
 
     test('rules_removeTextAfterSpace', () {
       var lines = <String>['br', 'nom.br', 'br2 and a comment', '*.br', '!br'];
 
-      expect(SuffixRules.process(lines),
-          containsAll(['br', 'nom.br', 'br2', '*.br', '!br']));
+      expect(
+          SuffixRules.process(lines),
+          containsAll([
+            Rule('br'),
+            Rule('nom.br'),
+            Rule('br2'),
+            Rule('*.br'),
+            Rule('!br')
+          ]));
     });
 
     test('mixed_removeCommentsEmptyAndTrailingText', () {
@@ -45,7 +52,7 @@ void main() {
       var processed = SuffixRules.process(lines);
 
       expect(processed, hasLength(2));
-      expect(processed, containsAll(['br', 'nom.br']));
+      expect(processed, containsAll([Rule('br'), Rule('nom.br')]));
     });
 
     test('mixed_dontAlterInputList', () {
@@ -59,57 +66,72 @@ void main() {
       SuffixRules.process(lines);
       expect(lines, hasLength(4));
     });
+
+    test('withPrivateSeparator_markPrivateAsNotIcann', () {
+      var lines = <String>['br', 'nom.br', '//BEGIN PRIVATE', 'pr', 'nom.pr'];
+
+      var processed = SuffixRules.process(lines);
+      expect(processed, hasLength(4));
+      expect(
+          processed,
+          containsAll([
+            Rule('br'),
+            Rule('nom.br'),
+            Rule('pr', isIcann: false),
+            Rule('nom.pr', isIcann: false)
+          ]));
+    });
   });
 
   group('validate_', () {
     test('validRules_dontThrow', () {
-      var lines = <String>[
-        'br',
-        '!br',
-        '*',
-        '!*',
-        'mp.br',
-        '!mp.br',
-        '*.br',
-        '!*.br',
-        'mp.nom.br',
-        '!mp.nom.br',
-        '*.nom.br',
-        '!*.nom.br',
-        '*.*',
-        '!*.*',
-        '*.nom.*',
-        '!*.nom.*'
+      var lines = <Rule>[
+        Rule('br'),
+        Rule('!br'),
+        Rule('*'),
+        Rule('!*'),
+        Rule('mp.br'),
+        Rule('!mp.br'),
+        Rule('*.br'),
+        Rule('!*.br'),
+        Rule('mp.nom.br'),
+        Rule('!mp.nom.br'),
+        Rule('*.nom.br'),
+        Rule('!*.nom.br'),
+        Rule('*.*'),
+        Rule('!*.*'),
+        Rule('*.nom.*'),
+        Rule('!*.nom.*')
       ];
 
       SuffixRules.validate(lines);
     });
 
     test('comments_throw', () {
-      expect(() => SuffixRules.validate(['br', '//br']),
+      expect(() => SuffixRules.validate([Rule('br'), Rule('//br')]),
           throwsFormatException);
     });
 
     test('emptyLines_throw', () {
-      expect(
-          () => SuffixRules.validate(['br', '']), throwsFormatException);
-      expect(
-          () => SuffixRules.validate(['br', ' ']), throwsFormatException);
-      expect(() => SuffixRules.validate(['br', ' \t \t \t \t ']),
+      expect(() => SuffixRules.validate([Rule('br'), Rule('')]),
+          throwsFormatException);
+      expect(() => SuffixRules.validate([Rule('br'), Rule(' ')]),
+          throwsFormatException);
+      expect(() => SuffixRules.validate([Rule('br'), Rule(' \t \t \t \t ')]),
           throwsFormatException);
     });
 
     test('rulesWithTrailingText_throw', () {
-      expect(() => SuffixRules.validate(['br', 'br and more']),
+      expect(() => SuffixRules.validate([Rule('br'), Rule('br and more')]),
           throwsFormatException);
     });
 
     test('invalidRules_throw', () {
-      expect(() => SuffixRules.validate(['.br']), throwsFormatException);
-      expect(() => SuffixRules.validate(['br.']), throwsFormatException);
-      expect(() => SuffixRules.validate(['**']), throwsFormatException);
-      expect(() => SuffixRules.validate(['!!']), throwsFormatException);
-      expect(() => SuffixRules.validate(['b..r']), throwsFormatException);
+      expect(() => SuffixRules.validate([Rule('.br')]), throwsFormatException);
+      expect(() => SuffixRules.validate([Rule('br.')]), throwsFormatException);
+      expect(() => SuffixRules.validate([Rule('**')]), throwsFormatException);
+      expect(() => SuffixRules.validate([Rule('!!')]), throwsFormatException);
+      expect(() => SuffixRules.validate([Rule('b..r')]), throwsFormatException);
     });
   });
 
@@ -139,7 +161,7 @@ void main() {
       SuffixRules.initFromList(['br', 'nom.br']);
       expect(SuffixRules.rules, isNotNull);
       expect(SuffixRules.rules, hasLength(2));
-      expect(SuffixRules.rules, containsAllInOrder(['br', 'nom.br']));
+      expect(SuffixRules.rules, containsAllInOrder([Rule('br'), Rule('nom.br')]));
     });
 
     test('beforeInitialising_returnNull', () {
@@ -148,12 +170,9 @@ void main() {
 
     test('modifyList_exception', () {
       SuffixRules.initFromList(['br', 'nom.br']);
-      expect(
-          () => SuffixRules.rules.add('!br'), throwsUnsupportedError);
-      expect(() => SuffixRules.rules.removeLast(),
-          throwsUnsupportedError);
-      expect(
-          () => SuffixRules.rules[0] = '!br', throwsUnsupportedError);
+      expect(() => SuffixRules.rules.add(Rule('!br')), throwsUnsupportedError);
+      expect(() => SuffixRules.rules.removeLast(), throwsUnsupportedError);
+      expect(() => SuffixRules.rules[0] = Rule('!br'), throwsUnsupportedError);
     });
   });
 
@@ -163,7 +182,7 @@ void main() {
 
       SuffixRules.initFromList(lines);
       expect(SuffixRules.rules, hasLength(2));
-      expect(SuffixRules.rules, containsAll(['br', 'nom.br']));
+      expect(SuffixRules.rules, containsAll([Rule('br'), Rule('nom.br')]));
     });
 
     test('listWithEmptyLines_emptyLinesRemoved', () {
@@ -171,7 +190,7 @@ void main() {
 
       SuffixRules.initFromList(lines);
       expect(SuffixRules.rules, hasLength(2));
-      expect(SuffixRules.rules, containsAll(['br', 'nom.br']));
+      expect(SuffixRules.rules, containsAll([Rule('br'), Rule('nom.br')]));
     });
 
     test('listWithRulesWithTrailingText_trailingTextRemoved', () {
@@ -179,12 +198,11 @@ void main() {
 
       SuffixRules.initFromList(lines);
       expect(SuffixRules.rules, hasLength(2));
-      expect(SuffixRules.rules, containsAll(['br', 'nom.br']));
+      expect(SuffixRules.rules, containsAll([Rule('br'), Rule('nom.br')]));
     });
 
     test('listWithInvalidRules_throw', () {
-      expect(
-          () => SuffixRules.initFromList(['.br']), throwsFormatException);
+      expect(() => SuffixRules.initFromList(['.br']), throwsFormatException);
     });
   });
 
@@ -193,6 +211,6 @@ void main() {
 
     SuffixRules.initFromString(list);
     expect(SuffixRules.rules, hasLength(3));
-    expect(SuffixRules.rules, containsAll(['br', 'nom.br', '*.com']));
+    expect(SuffixRules.rules, containsAll([Rule('br'), Rule('nom.br'), Rule('*.com')]));
   });
 }

@@ -10,4 +10,4 @@ dart_task:
   - test: --platform vm
   - test: --platform chrome
   - dartanalyzer: true
-  - dartfmt
+  - dartfmt: true

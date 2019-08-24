@@ -15,6 +15,8 @@
 class SuffixRules {
   static List<Rule> _rules;
 
+  SuffixRules._();
+
   /// Returns an unmodifiable list containing the current rules.
   ///
   /// [null] is returned if the list has not been initialised.
@@ -100,7 +102,9 @@ class SuffixRules {
     int invalidRules = 0;
 
     for (var rule in rules) {
-      if (_isComment(rule.labels) || _isEmpty(rule.labels) || !_isValidRule(rule.labels)) {
+      if (_isComment(rule.labels) ||
+          _isEmpty(rule.labels) ||
+          !_isValidRule(rule.labels)) {
         invalidRules++;
       }
     }
@@ -133,8 +137,10 @@ class Rule {
   ///
   /// Does not contain the exclamation point (!) that marks exception rules.
   final String labels;
+
   /// If the rule is an exception rule (preceded by a `!` in the original suffix list).
   final bool isException;
+
   /// If the rule is an ICANN/IANA rule.
   final bool isIcann;
 

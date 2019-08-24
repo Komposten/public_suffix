@@ -1,22 +1,23 @@
-#public_suffix
-**A library for getting the public suffix of a URL**
+# public_suffix
+**A domain parser based on the [Public Suffix List](https://publicsuffix.org/)**
 
-public_suffix finds the public suffix (as defined in the [Public Suffix List](https://publicsuffix.org/)) of URLs.
+public_suffix identifies the public suffixes, root domains and registrable parts of URLs.
 
 ## Usage
-1) Import `public_suffix_io.dart` or `public_suffix_html.dart` (for web apps).
-2) Initialise the Public Suffix List.
-3) Create a new instance of `PublicSuffix()` based on a URL.
+1) Import `public_suffix_io.dart` or `public_suffix_browser.dart`.
+2) Initialise PublicSuffixList from a file containing suffix rules.
+3) Create a new instance of `PublicSuffix` to parse a URL.
 
 ```dart
 import 'public_suffix_io.dart';
 
 main() {
-  PublicSuffixList.initFromUri(Uri.parse("https://publicsuffix.org/list/public_suffix_list.dat"));
-  PublicSuffix suffix = getPublicSuffix(Uri.parse("https://publicsuffix.org"));
+  PublicSuffixListHelper.initFromUri(Uri.parse("https://publicsuffix.org/list/public_suffix_list.dat"));
+  PublicSuffix suffix = PublicSuffix(Uri.parse("https://www.publicsuffix.org"));
   
-  print(suffix.suffix); // "org"
+  print(suffix.publicTld); // "org"
   print(suffix.rootDomain); // "publicsuffix"
+  print(suffix.registrableDomain); // "publicsuffix.org"
 }
 ```
 

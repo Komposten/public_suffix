@@ -7,6 +7,11 @@
  * it under the terms of the MIT license as written in the LICENSE file in the root
  * of this project.
  */
+
+/// A wrapper for a static list containing rules for public suffixes.
+///
+/// After initialisation the rules can be accessed using [suffixList]. The list
+/// can be disposed of using [dispose] if it is no longer needed.
 class PublicSuffixList {
   static List<String> _suffixList;
 

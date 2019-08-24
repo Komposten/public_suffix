@@ -12,6 +12,7 @@ import 'package:punycode/punycode.dart';
 
 import 'public_suffix_list.dart';
 
+/// A description of the public suffix, root domain and registrable domain for a URI.
 class PublicSuffix {
   final Uri sourceUri;
 
@@ -22,13 +23,26 @@ class PublicSuffix {
 
   PublicSuffix _punyDecoded;
 
+  /// Returns the registrable domain part of the URI this object was initialised with.
+  ///
+  /// The registrable domain is the public suffix and one preceding label.
+  /// For example, `images.google.co.uk` has the registrable domain `google.co.uk`.
   String get registrableDomain => _registrableDomain;
 
+  /// Returns the root domain part of the URI this object was initialised with.
+  ///
+  /// The root domain is the label that precedes the public suffix.
+  /// For example, `images.google.co.uk` has the root domain `google`.
   String get rootDomain => _rootDomain;
 
+  /// Returns the public suffix part of the URI this object was initialised with.
+  ///
+  /// The public suffix is the labels at the end of the URL which are not controlled
+  /// by the registrant of the domain.
+  /// For example, `images.google.co.uk` has the public suffix `co.uk`.
   String get publicTld => _publicTld;
 
-  /// Returns a punycode decoded version of this.
+  /// Returns a punycode decoded version of this object.
   PublicSuffix get punyDecoded => _punyDecoded;
 
   PublicSuffix._(this.sourceUri, this._rootDomain, this._publicTld) {

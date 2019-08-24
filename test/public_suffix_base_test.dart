@@ -24,32 +24,32 @@ void main() {
         url = "http://" + url;
       }
       var suffix = PublicSuffix(Uri.parse(url));
-      expect(suffix.rootDomain, equals(expectedRoot));
-      expect(suffix.publicTld, equals(expectedTld));
+      expect(suffix.root, equals(expectedRoot));
+      expect(suffix.suffix, equals(expectedTld));
     }
 
     test('mixedCaseUrl_treatAsLowerCase', () {
       var suffix = PublicSuffix(Uri.parse('http://www.PuB.dEV'));
-      expect(suffix.registrableDomain, equals('pub.dev'));
+      expect(suffix.domain, equals('pub.dev'));
     });
 
     test('trailingDots_ignoreTrailingDots', () {
       var suffix = PublicSuffix(Uri.parse('http://www.pub.dev...'));
-      expect(suffix.registrableDomain, equals('pub.dev'));
+      expect(suffix.domain, equals('pub.dev'));
     });
 
     test('urlWithRegistrableDomain_correctRegistrableDomain', () {
       var suffix = PublicSuffix(Uri.parse('http://www.pub.dev'));
-      expect(suffix.registrableDomain,
-          equals("${suffix.rootDomain}.${suffix.publicTld}"));
+      expect(suffix.domain,
+          equals("${suffix.root}.${suffix.suffix}"));
     });
 
     test('urlWithoutRegistrableDomain_registrableDomainIsNull', () {
       var suffix = PublicSuffix(Uri.parse('http://dev'));
 
-      expect(suffix.rootDomain, isEmpty);
-      expect(suffix.publicTld, equals('dev'));
-      expect(suffix.registrableDomain, isNull);
+      expect(suffix.root, isEmpty);
+      expect(suffix.suffix, equals('dev'));
+      expect(suffix.domain, isNull);
     });
 
     test('basicUrls_correctlyIdentifyRootAndTld', () {
@@ -163,20 +163,51 @@ void main() {
       testPublicSuffix('xn--fiqs8s', '', 'xn--fiqs8s');
     });
 
+    test('githubIoUrl_differentOverallAndIcannData', () {
+      var suffix = PublicSuffix(Uri.parse('http://komposten.github.io'));
+      expect(suffix.root, equals('komposten'));
+      expect(suffix.suffix, equals('github.io'));
+      expect(suffix.icannRoot, equals('github'));
+      expect(suffix.icannSuffix, equals('io'));
+      expect(suffix.punyDecoded.root, equals('komposten'));
+      expect(suffix.punyDecoded.suffix, equals('github.io'));
+      expect(suffix.punyDecoded.icannRoot, equals('github'));
+      expect(suffix.punyDecoded.icannSuffix, equals('io'));
+    });
+
     test('punycodedUrl_punydecodedInstanceHasDecodedData', () {
       var suffix = PublicSuffix(Uri.parse('http://xn--85x722f.xn--55qx5d.cn'));
-      expect(suffix.rootDomain, equals('xn--85x722f'));
-      expect(suffix.publicTld, equals('xn--55qx5d.cn'));
-      expect(suffix.punyDecoded.rootDomain, equals('食狮'));
-      expect(suffix.punyDecoded.publicTld, equals('公司.cn'));
+      expect(suffix.root, equals('xn--85x722f'));
+      expect(suffix.suffix, equals('xn--55qx5d.cn'));
+      expect(suffix.punyDecoded.root, equals('食狮'));
+      expect(suffix.punyDecoded.suffix, equals('公司.cn'));
     });
 
     test('notPunycodedUrl_punydecodedInstanceHasSameData', () {
       var suffix = PublicSuffix(Uri.parse('http://google.co.uk'));
-      expect(suffix.rootDomain, equals('google'));
-      expect(suffix.publicTld, equals('co.uk'));
-      expect(suffix.punyDecoded.rootDomain, equals('google'));
-      expect(suffix.punyDecoded.publicTld, equals('co.uk'));
+      expect(suffix.root, equals('google'));
+      expect(suffix.suffix, equals('co.uk'));
+      expect(suffix.punyDecoded.root, equals('google'));
+      expect(suffix.punyDecoded.suffix, equals('co.uk'));
+    });
+
+    tearDownAll(() => SuffixRules.dispose());
+  });
+
+  group('isPrivateSuffix_', () {
+    setUpAll(() async {
+      await SuffixRulesHelper.initFromUri(Uri.parse(
+          'file:///G:/Projects/Dart/public_suffix/test/res/public_suffix_list.dat'));
+    });
+
+    test('hasMatchedPrivateRule_true', () {
+      var suffix = PublicSuffix(Uri.parse('http://komposten.github.io'));
+      expect(suffix.isPrivateSuffix(), isTrue);
+    });
+
+    test('hasNotMatchedPrivateRule_false', () {
+      var suffix = PublicSuffix(Uri.parse('http://google.co.uk'));
+      expect(suffix.isPrivateSuffix(), isFalse);
     });
 
     tearDownAll(() => SuffixRules.dispose());

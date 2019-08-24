@@ -17,36 +17,66 @@ class PublicSuffix {
   final Uri sourceUri;
 
   bool _sourcePunycoded = false;
-  String _rootDomain;
-  String _publicTld;
-  String _registrableDomain;
+  String _root;
+  String _suffix;
+  String _domain;
+  String _icannRoot;
+  String _icannSuffix;
+  String _icannDomain;
 
   PublicSuffix _punyDecoded;
 
-  /// Returns the registrable domain part of the URI this object was initialised with.
+  /// Returns the registrable domain part of the URI, based on both ICANN/IANA and private rules.
   ///
   /// The registrable domain is the public suffix and one preceding label.
   /// For example, `images.google.co.uk` has the registrable domain `google.co.uk`.
-  String get registrableDomain => _registrableDomain;
+  String get domain => _domain;
 
-  /// Returns the root domain part of the URI this object was initialised with.
+  /// Returns the root domain part of the URI, based on both ICANN/IANA and private rules.
   ///
   /// The root domain is the label that precedes the public suffix.
   /// For example, `images.google.co.uk` has the root domain `google`.
-  String get rootDomain => _rootDomain;
+  String get root => _root;
 
-  /// Returns the public suffix part of the URI this object was initialised with.
+  /// Returns the public suffix part of the URI, based on both ICANN/IANA and private rules.
   ///
   /// The public suffix is the labels at the end of the URL which are not controlled
   /// by the registrant of the domain.
   /// For example, `images.google.co.uk` has the public suffix `co.uk`.
-  String get publicTld => _publicTld;
+  String get suffix => _suffix;
+
+  /// Returns the registrable domain part of the URI, based on ICANN/IANA rules.
+  ///
+  /// The registrable domain is the public suffix and one preceding label.
+  /// For example, `images.google.co.uk` has the registrable domain `google.co.uk`.
+  String get icannDomain => _icannDomain;
+
+  /// Returns the root domain part of the URI, based on ICANN/IANA rules.
+  ///
+  /// The root domain is the label that precedes the public suffix.
+  /// For example, `images.google.co.uk` has the root domain `google`.
+  String get icannRoot => _icannRoot;
+
+  /// Returns the public suffix part of the URI, based on ICANN/IANA rules.
+  ///
+  /// The public suffix is the labels at the end of the URL which are not controlled
+  /// by the registrant of the domain.
+  /// For example, `images.google.co.uk` has the public suffix `co.uk`.
+  String get icannSuffix => _icannSuffix;
 
   /// Returns a punycode decoded version of this object.
   PublicSuffix get punyDecoded => _punyDecoded;
 
-  PublicSuffix._(this.sourceUri, this._rootDomain, this._publicTld) {
-    _registrableDomain = "$_rootDomain.$_publicTld";
+  /// Checks if the URI was matched with a private rule rather than an ICANN/IANA rule.
+  ///
+  /// If [true], then [root], [suffix] and [domain] will be different from the
+  /// `icann`-prefixed getters.
+  bool isPrivateSuffix() => icannSuffix != _suffix;
+
+  PublicSuffix._(this.sourceUri, this._root, this._suffix, this._icannRoot,
+      this._icannSuffix) {
+    _domain = _buildRegistrableDomain(_root, _suffix);
+    _icannDomain = _buildRegistrableDomain(_icannRoot, _icannSuffix);
   }
 
   /// Creates a new instance based on the specified [sourceUri].
@@ -57,7 +87,7 @@ class PublicSuffix {
   /// (e.g. if no protocol is specified).
   PublicSuffix(this.sourceUri) {
     if (!SuffixRules.hasInitialised()) {
-      throw StateError("PublicSuffixList has not been initialised!");
+      throw StateError('PublicSuffixList has not been initialised!');
     }
     if (!sourceUri.hasAuthority) {
       throw ArgumentError(
@@ -70,24 +100,32 @@ class PublicSuffix {
   void _parseUri(Uri uri, List<Rule> suffixList) {
     var host = _decodeHost(uri);
     var matchingRules = _findMatchingRules(host, suffixList);
-    var prevailingRule = _getPrevailingRule(matchingRules);
+    var prevailingIcannRule = _getPrevailingRule(matchingRules['icann']);
+    var prevailingAllRule = _getPrevailingRule(matchingRules['all']);
 
-    if (prevailingRule.isException) {
-      prevailingRule = _trimExceptionRule(prevailingRule);
+    if (prevailingIcannRule.isException) {
+      prevailingIcannRule = _trimExceptionRule(prevailingIcannRule);
     }
 
-    _publicTld = _getPublicSuffix(host, prevailingRule);
-    _rootDomain = _getDomainRoot(host, _publicTld);
-    _punyDecoded = PublicSuffix._(sourceUri, _rootDomain, _publicTld);
-
-    if (_sourcePunycoded) {
-      _publicTld = _punyEncode(_publicTld);
-      _rootDomain = _punyEncode(_rootDomain);
+    if (prevailingAllRule.isException) {
+      prevailingAllRule = _trimExceptionRule(prevailingAllRule);
     }
 
-    if (_rootDomain.isNotEmpty) {
-      _registrableDomain = "$_rootDomain.$_publicTld";
-    }
+    var allData = _applyRule(host, prevailingAllRule);
+    var icannData = _applyRule(host, prevailingIcannRule);
+
+    _suffix = allData['suffix'];
+    _root = allData['root'];
+    _domain = allData['registrable'];
+    _icannSuffix = icannData['suffix'];
+    _icannRoot = icannData['root'];
+    _icannDomain = icannData['registrable'];
+
+    var puny = allData['puny'];
+    var icannPuny = icannData['puny'];
+
+    _punyDecoded = PublicSuffix._(sourceUri, puny['root'], puny['suffix'],
+        icannPuny['root'], icannPuny['suffix']);
   }
 
   String _decodeHost(Uri uri) {
@@ -110,21 +148,27 @@ class PublicSuffix {
     return host;
   }
 
-  List<Rule> _findMatchingRules(String host, List<Rule> suffixList) {
-    var matches = <Rule>[];
+  Map<String, List<Rule>> _findMatchingRules(
+      String host, List<Rule> suffixList) {
+    var icannMatches = <Rule>[];
+    var allMatches = <Rule>[];
 
     for (var rule in suffixList) {
       if (_ruleMatches(rule, host)) {
-        matches.add(rule);
+        allMatches.add(rule);
+
+        if (rule.isIcann) {
+          icannMatches.add(rule);
+        }
       }
     }
 
-    return matches;
+    return {'icann': icannMatches, 'all': allMatches};
   }
 
   bool _ruleMatches(Rule rule, String host) {
-    var hostParts = host.split(".");
-    var ruleParts = rule.labels.split(".");
+    var hostParts = host.split('.');
+    var ruleParts = rule.labels.split('.');
 
     hostParts.removeWhere((e) => e.isEmpty);
 
@@ -138,8 +182,7 @@ class PublicSuffix {
         var rulePart = ruleParts[r];
         var hostPart = hostParts[h];
 
-        if (rulePart != '*' &&
-            rulePart != hostPart) {
+        if (rulePart != '*' && rulePart != hostPart) {
           matches = false;
           break;
         }
@@ -181,6 +224,26 @@ class PublicSuffix {
     return Rule(labels, isIcann: prevailingRule.isIcann);
   }
 
+  Map<String, dynamic> _applyRule(String host, Rule rule) {
+    var suffix = _getPublicSuffix(host, rule);
+    var root = _getDomainRoot(host, suffix);
+    var puny = {'root': root, 'suffix': suffix};
+
+    if (_sourcePunycoded) {
+      suffix = _punyEncode(suffix);
+      root = _punyEncode(root);
+    }
+
+    var registrable = _buildRegistrableDomain(root, suffix);
+
+    return {
+      'suffix': suffix,
+      'root': root,
+      'puny': puny,
+      'registrable': registrable
+    };
+  }
+
   String _getPublicSuffix(String host, Rule prevailingRule) {
     var ruleLength = '.'.allMatches(prevailingRule.labels).length + 1;
 
@@ -220,5 +283,9 @@ class PublicSuffix {
         return part;
       }
     }).join('.');
+  }
+
+  String _buildRegistrableDomain(String root, String suffix) {
+    return (root.isNotEmpty ? "$root.$suffix" : null);
   }
 }

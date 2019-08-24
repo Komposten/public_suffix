@@ -11,14 +11,13 @@ void main() {
   });
 
   test('PublicSuffix_uriWithoutAuthority_throwArgumentError', () async {
-    await initPublicSuffixList(Uri.parse(
-        'file:///G:/Projects/Dart/public_suffix/test/res/public_suffix_list.dat'));
+    PublicSuffixList.initFromString("");
     expect(() => PublicSuffix(Uri.parse('www.pub.dev')), throwsArgumentError);
   });
 
   group('PublicSuffix_', () {
     setUpAll(() async {
-      await initPublicSuffixList(Uri.parse(
+      await PublicSuffixListHelper.initFromUri(Uri.parse(
           'file:///G:/Projects/Dart/public_suffix/test/res/public_suffix_list.dat'));
     });
 

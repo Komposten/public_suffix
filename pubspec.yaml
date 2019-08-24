@@ -7,7 +7,7 @@ issue_tracker: https://www.github.com/komposten/public_suffix/issues
 author: Jakob Hjelm <j.hjelm586@hotmail.com>
 
 environment:
-  sdk: '>=2.1.0 <3.0.0'
+  sdk: '>=2.2.0 <3.0.0'
 
 dependencies:
   punycode: ^0.1.0

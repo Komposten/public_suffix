@@ -1,6 +1,6 @@
 name: public_suffix
-description: A library for getting the public suffix of a URL.
-# version: 1.0.0
+description: A domain parser based on the Public Suffix List
+version: 1.0.0
 homepage: https://www.github.com/komposten/
 repository: https://www.github.com/komposten/public_suffix
 issue_tracker: https://www.github.com/komposten/public_suffix/issues

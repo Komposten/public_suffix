@@ -161,7 +161,8 @@ void main() {
       SuffixRules.initFromList(['br', 'nom.br']);
       expect(SuffixRules.rules, isNotNull);
       expect(SuffixRules.rules, hasLength(2));
-      expect(SuffixRules.rules, containsAllInOrder([Rule('br'), Rule('nom.br')]));
+      expect(
+          SuffixRules.rules, containsAllInOrder([Rule('br'), Rule('nom.br')]));
     });
 
     test('beforeInitialising_returnNull', () {
@@ -211,6 +212,7 @@ void main() {
 
     SuffixRules.initFromString(list);
     expect(SuffixRules.rules, hasLength(3));
-    expect(SuffixRules.rules, containsAll([Rule('br'), Rule('nom.br'), Rule('*.com')]));
+    expect(SuffixRules.rules,
+        containsAll([Rule('br'), Rule('nom.br'), Rule('*.com')]));
   });
 }

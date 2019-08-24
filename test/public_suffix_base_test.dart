@@ -1,6 +1,7 @@
 @TestOn('vm')
 import 'package:public_suffix/public_suffix_io.dart';
 import 'package:test/test.dart';
+import 'io_test_utils.dart';
 
 void main() {
   test('PublicSuffix_PublicSuffixListNotInitialised_throwStateError', () {
@@ -15,8 +16,7 @@ void main() {
 
   group('PublicSuffix_', () {
     setUpAll(() async {
-      await SuffixRulesHelper.initFromUri(Uri.parse(
-          'file:///G:/Projects/Dart/public_suffix/test/res/public_suffix_list.dat'));
+      await SuffixRulesHelper.initFromUri(getSuffixListFileUri());
     });
 
     void testPublicSuffix(String url, String expectedRoot, String expectedTld) {
@@ -40,8 +40,7 @@ void main() {
 
     test('urlWithRegistrableDomain_correctRegistrableDomain', () {
       var suffix = PublicSuffix(Uri.parse('http://www.pub.dev'));
-      expect(suffix.domain,
-          equals("${suffix.root}.${suffix.suffix}"));
+      expect(suffix.domain, equals("${suffix.root}.${suffix.suffix}"));
     });
 
     test('urlWithoutRegistrableDomain_registrableDomainIsNull', () {
@@ -196,8 +195,7 @@ void main() {
 
   group('isPrivateSuffix_', () {
     setUpAll(() async {
-      await SuffixRulesHelper.initFromUri(Uri.parse(
-          'file:///G:/Projects/Dart/public_suffix/test/res/public_suffix_list.dat'));
+      await SuffixRulesHelper.initFromUri(getSuffixListFileUri());
     });
 
     test('hasMatchedPrivateRule_true', () {

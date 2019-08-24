@@ -8,9 +8,5 @@
  * of this project.
  */
 
-///A `dart:html`-based library for getting the public suffix of a URL.
-library public_suffix_html;
-
-export 'src/public_suffix_base.dart';
-export 'src/suffix_rules.dart';
+export 'public_suffix.dart';
 export 'src/browser/suffix_rules_helper.dart';

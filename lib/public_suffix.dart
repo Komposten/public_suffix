@@ -8,5 +8,5 @@
  * of this project.
  */
 
-export 'public_suffix.dart';
-export 'src/io/suffix_rules_helper.dart';
+export 'src/public_suffix_base.dart';
+export 'src/suffix_rules.dart';

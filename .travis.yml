@@ -1,0 +1,13 @@
+language: dart
+branches:
+  only:
+    - master
+    - /^(?i:release)-.+$/
+dart:
+  - stable
+  - "2.1.0"
+dart_task:
+  - test: --platform vm
+  - test: --platform chrome
+  - dartanalyzer: true
+  - dartfmt: true

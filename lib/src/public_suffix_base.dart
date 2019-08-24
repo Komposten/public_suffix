@@ -10,7 +10,7 @@
 
 import 'package:punycode/punycode.dart';
 
-import 'public_suffix_list.dart';
+import 'suffix_rules.dart';
 
 /// A description of the public suffix, root domain and registrable domain for a URI.
 class PublicSuffix {
@@ -51,12 +51,12 @@ class PublicSuffix {
 
   /// Creates a new instance based on the specified [sourceUri].
   ///
-  /// Throws a [StateError] if [PublicSuffixList] has not been initialised.
+  /// Throws a [StateError] if [SuffixRules] has not been initialised.
   ///
   /// Throws an [ArgumentError] if [sourceUri] is missing the authority component
   /// (e.g. if no protocol is specified).
   PublicSuffix(this.sourceUri) {
-    if (!PublicSuffixList.hasInitialised()) {
+    if (!SuffixRules.hasInitialised()) {
       throw StateError("PublicSuffixList has not been initialised!");
     }
     if (!sourceUri.hasAuthority) {
@@ -64,7 +64,7 @@ class PublicSuffix {
           "The URI is missing the authority component: $sourceUri");
     }
 
-    _parseUri(sourceUri, PublicSuffixList.suffixList);
+    _parseUri(sourceUri, SuffixRules.rules);
   }
 
   void _parseUri(Uri uri, List<String> suffixList) {

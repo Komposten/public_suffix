@@ -1,7 +1,5 @@
 @TestOn('vm')
 import 'package:public_suffix/public_suffix_io.dart';
-import 'package:public_suffix/src/public_suffix_base.dart';
-import 'package:public_suffix/src/public_suffix_list.dart';
 import 'package:test/test.dart';
 
 void main() {
@@ -11,13 +9,13 @@ void main() {
   });
 
   test('PublicSuffix_uriWithoutAuthority_throwArgumentError', () async {
-    PublicSuffixList.initFromString("");
+    SuffixRules.initFromString("");
     expect(() => PublicSuffix(Uri.parse('www.pub.dev')), throwsArgumentError);
   });
 
   group('PublicSuffix_', () {
     setUpAll(() async {
-      await PublicSuffixListHelper.initFromUri(Uri.parse(
+      await SuffixRulesHelper.initFromUri(Uri.parse(
           'file:///G:/Projects/Dart/public_suffix/test/res/public_suffix_list.dat'));
     });
 
@@ -181,6 +179,6 @@ void main() {
       expect(suffix.punyDecoded.publicTld, equals('co.uk'));
     });
 
-    tearDownAll(() => PublicSuffixList.dispose());
+    tearDownAll(() => SuffixRules.dispose());
   });
 }

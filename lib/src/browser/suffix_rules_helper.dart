@@ -9,32 +9,32 @@
  */
 import 'dart:html';
 
-import '../public_suffix_list.dart';
+import '../suffix_rules.dart';
 
-/// A static helper class for initialising [PublicSuffixList].
+/// A static helper class for initialising [SuffixRules].
 ///
-/// This class provides simple functions for initialising [PublicSuffixList]
+/// This class provides simple functions for initialising [SuffixRules]
 /// from resources obtained using http requests.
 ///
-/// To initialise directly from strings instead, use [PublicSuffixList.initFromString].
-class PublicSuffixListHelper {
-  PublicSuffixListHelper._();
+/// To initialise directly from strings instead, use [SuffixRules.initFromString].
+class SuffixRulesHelper {
+  SuffixRulesHelper._();
 
-  /// Initialises [PublicSuffixList] using a suffix list resource obtained from a URI.
+  /// Initialises [SuffixRules] using a suffix list resource obtained from a URI.
   ///
   /// [HttpRequest.request] is used to retrieve the resource, and the optional
   /// parameters can be used to tweak this request. If more fine-grained control
   /// over the request is needed, consider obtaining the suffix list using custom
-  /// code first and then passing it to [PublicSuffixList.initFromString].
+  /// code first and then passing it to [SuffixRules.initFromString].
   ///
   /// An [Exception] is thrown if the request fails.
-  static Future<void> initFromUri(Uri publicSuffixList,
+  static Future<void> initFromUri(Uri uri,
       {bool withCredentials,
       Map<String, String> requestHeaders,
       dynamic sendData,
       void Function(ProgressEvent) onProgress}) async {
     try {
-      var request = await HttpRequest.request(publicSuffixList.toString(),
+      var request = await HttpRequest.request(uri.toString(),
           withCredentials: withCredentials,
           requestHeaders: requestHeaders,
           sendData: sendData,
@@ -42,7 +42,7 @@ class PublicSuffixListHelper {
 
       switch (request.status) {
         case 200:
-          PublicSuffixList.initFromString(request.responseText);
+          SuffixRules.initFromString(request.responseText);
           break;
         default:
           throw request;

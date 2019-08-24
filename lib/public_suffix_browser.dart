@@ -12,5 +12,5 @@
 library public_suffix_html;
 
 export 'src/public_suffix_base.dart';
-export 'src/public_suffix_list.dart';
-export 'src/browser/public_suffix_helper.dart';
+export 'src/suffix_rules.dart';
+export 'src/browser/suffix_rules_helper.dart';

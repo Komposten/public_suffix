@@ -3,24 +3,23 @@ import 'package:test/test.dart';
 
 import 'dart:io';
 import 'package:public_suffix/public_suffix_io.dart';
-import 'package:public_suffix/src/public_suffix_list.dart';
 
 void main() {
-  tearDown(() => PublicSuffixList.dispose());
+  tearDown(() => SuffixRules.dispose());
 
   test('initPublicSuffixList_crossDomainUrl_initList', () async {
-    await PublicSuffixListHelper.initFromUri(
+    await SuffixRulesHelper.initFromUri(
         Uri.parse('https://publicsuffix.org/list/public_suffix_list.dat'));
-    expect(PublicSuffixList.hasInitialised(), isTrue);
-    expect(PublicSuffixList.suffixList, isNotEmpty);
+    expect(SuffixRules.hasInitialised(), isTrue);
+    expect(SuffixRules.rules, isNotEmpty);
   });
 
   test('initPublicSuffixList_invalidUrl_throwException', () async {
     expect(
-        PublicSuffixListHelper.initFromUri(
+        SuffixRulesHelper.initFromUri(
             Uri.parse('http://127.0.0.2/list.dat')),
         throwsException);
-    expect(PublicSuffixList.hasInitialised(), isFalse);
+    expect(SuffixRules.hasInitialised(), isFalse);
   });
 
   group('initPublicSuffixList_validFileUri_', () {
@@ -59,9 +58,9 @@ void main() {
     });
 
     test('initList', () async {
-      await PublicSuffixListHelper.initFromUri(fileUri);
-      expect(PublicSuffixList.hasInitialised(), isTrue);
-      expect(PublicSuffixList.suffixList, isNotEmpty);
+      await SuffixRulesHelper.initFromUri(fileUri);
+      expect(SuffixRules.hasInitialised(), isTrue);
+      expect(SuffixRules.rules, isNotEmpty);
     });
   });
 }

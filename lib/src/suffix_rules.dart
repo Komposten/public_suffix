@@ -10,37 +10,37 @@
 
 /// A wrapper for a static list containing rules for public suffixes.
 ///
-/// After initialisation the rules can be accessed using [suffixList]. The list
+/// After initialisation the rules can be accessed using [rules]. The list
 /// can be disposed of using [dispose] if it is no longer needed.
-class PublicSuffixList {
-  static List<String> _suffixList;
+class SuffixRules {
+  static List<String> _rules;
 
-  /// Returns the current suffix list.
+  /// Returns an unmodifiable list containing the current rules.
   ///
-  /// If the list has been initialised, an unmodifiable version is returned.
-  /// Otherwise [null] is returned.
-  static List<String> get suffixList =>
-      _suffixList != null ? List.unmodifiable(_suffixList) : null;
+  /// [null] is returned if the list has not been initialised.
+  static List<String> get rules =>
+      _rules != null ? List.unmodifiable(_rules) : null;
 
-  /// Checks if the suffix list has been initialised.
-  static bool hasInitialised() => _suffixList != null;
+  /// Checks if the rule list has been initialised.
+  static bool hasInitialised() => _rules != null;
 
-  /// Initialises the suffix list.
+  /// Initialises the rule list.
   ///
-  /// [suffixListText] is expected to contain the contents of a suffix list across multiple lines,
+  /// [rules] is expected to contain the contents of a suffix list with one rule per line,
   /// like the file at [publicsuffix.org](https://publicsuffix.org/list/public_suffix_list.dat).
-  static void initFromString(String suffixListText) {
-    initFromList(suffixListText.split(RegExp(r'[\r\n]+')));
+  static void initFromString(String rules) {
+    initFromList(rules.split(RegExp(r'[\r\n]+')));
   }
 
-  /// Initialises the suffix list.
+  /// Initialises the rule list.
   ///
-  /// [suffixListLines] is expected to be the individual lines of a suffix list like the one at
-  /// [publicsuffix.org](https://publicsuffix.org/list/public_suffix_list.dat).
-  static void initFromList(List<String> suffixListLines) {
-    suffixListLines = process(suffixListLines);
-    validate(suffixListLines);
-    _suffixList = suffixListLines;
+  /// [rules] is expected to contain the contents of a suffix list with one rule per element.
+  /// See [publicsuffix.org](https://publicsuffix.org/list/public_suffix_list.dat)
+  /// for the rule format.
+  static void initFromList(List<String> rules) {
+    rules = process(rules);
+    validate(rules);
+    _rules = rules;
   }
 
   /// Removes text from the list that is not related to any rules.
@@ -56,11 +56,11 @@ class PublicSuffixList {
   /// comparisons later.
   ///
   /// The resulting list is returned as a new instance, so that the original
-  /// [suffixListLines] remains untouched.
-  static List<String> process(List<String> suffixListLines) {
+  /// list [rules] remains untouched.
+  static List<String> process(List<String> rules) {
     var newList = <String>[];
 
-    for (var line in suffixListLines) {
+    for (var line in rules) {
       if (!_isComment(line) && !_isEmpty(line)) {
         var firstSpace = line.indexOf(' ');
 
@@ -75,27 +75,27 @@ class PublicSuffixList {
     return newList;
   }
 
-  /// Validates the format of the provided data.
+  /// Validates the format of the provided rules.
   ///
-  /// The content of [suffixListLines] is validated against the expected format
-  /// is described on [publicsuffix.org](https://publicsuffix.org/list/).
-  /// [suffixListLines] is expected to first have been passed through [process].
+  /// The content of [rules] is validated against the expected format
+  /// as described on [publicsuffix.org](https://publicsuffix.org/list/).
+  /// [rules] is expected to first have been passed through [process].
   ///
   /// In brief:
   ///
   /// * Rules should not start with a period (.)
   /// * Rules may contain asterisks (*) as wildcards
-  ///     * Wildcards must be surrounded by periods or line start/end
+  ///     * Wildcards must be surrounded by periods or the line start/end
   ///     * Example: `*.uk` is valid, `c*.uk` is not
   /// * Rules that start with exclamation marks (!) mark exceptions to previous rules
   ///     * Example: `!co.uk` would exclude `co.uk` from `*.uk`
   ///
   /// If at least one rule in the list is invalid, a [FormatException] is thrown
-  /// containing information about the amount of invalid lines.
-  static void validate(List<String> suffixListLines) {
+  /// containing information about the amount of invalid lines in the message.
+  static void validate(List<String> rules) {
     int invalidLines = 0;
 
-    for (var line in suffixListLines) {
+    for (var line in rules) {
       if (_isComment(line) || _isEmpty(line) || !_isValidRule(line)) {
         invalidLines++;
       }
@@ -103,7 +103,7 @@ class PublicSuffixList {
 
     if (invalidLines > 0) {
       throw FormatException(
-          "Invalid suffix list: $invalidLines/${suffixListLines.length} lines are not formatted properly!");
+          "Invalid suffix list: $invalidLines/${rules.length} lines are not formatted properly!");
     }
   }
 
@@ -119,6 +119,6 @@ class PublicSuffixList {
   ///
   /// [hasInitialised] will return [false] after this has been called.
   static void dispose() {
-    _suffixList = null;
+    _rules = null;
   }
 }

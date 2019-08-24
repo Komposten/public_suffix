@@ -8,13 +8,19 @@
  * of this project.
  */
 
+import 'package:punycode/punycode.dart';
+
 import 'public_suffix_list.dart';
 
 class PublicSuffix {
   final Uri sourceUri;
+
+  bool _sourcePunycoded = false;
   String _rootDomain;
   String _publicTld;
   String _registrableDomain;
+
+  PublicSuffix _punyDecoded;
 
   String get registrableDomain => _registrableDomain;
 
@@ -22,16 +28,33 @@ class PublicSuffix {
 
   String get publicTld => _publicTld;
 
+  /// Returns a punycode decoded version of this.
+  PublicSuffix get punyDecoded => _punyDecoded;
+
+  PublicSuffix._(this.sourceUri, this._rootDomain, this._publicTld) {
+    _registrableDomain = "$_rootDomain.$_publicTld";
+  }
+
+  /// Creates a new instance based on the specified [sourceUri].
+  ///
+  /// Throws a [StateError] if [PublicSuffixList] has not been initialised.
+  ///
+  /// Throws an [ArgumentError] if [sourceUri] is missing the authority component
+  /// (e.g. if no protocol is specified).
   PublicSuffix(this.sourceUri) {
     if (!PublicSuffixList.hasInitialised()) {
       throw StateError("PublicSuffixList has not been initialised!");
+    }
+    if (!sourceUri.hasAuthority) {
+      throw ArgumentError(
+          "The URI is missing the authority component: $sourceUri");
     }
 
     _parseUri(sourceUri, PublicSuffixList.suffixList);
   }
 
   void _parseUri(Uri uri, List<String> suffixList) {
-    var host = uri.host.replaceAll(RegExp(r'\.+$'), '').toLowerCase();
+    var host = _decodeHost(uri);
     var matchingRules = _findMatchingRules(host, suffixList);
     var prevailingRule = _getPrevailingRule(matchingRules);
 
@@ -40,13 +63,37 @@ class PublicSuffix {
     }
 
     _publicTld = _getPublicSuffix(host, prevailingRule);
-    _rootDomain = _getDomainRoot(uri, _publicTld);
+    _rootDomain = _getDomainRoot(host, _publicTld);
+    _punyDecoded = PublicSuffix._(sourceUri, _rootDomain, _publicTld);
+
+    if (_sourcePunycoded) {
+      _publicTld = _punyEncode(_publicTld);
+      _rootDomain = _punyEncode(_rootDomain);
+    }
 
     if (_rootDomain.isNotEmpty) {
       _registrableDomain = "$_rootDomain.$_publicTld";
     }
+  }
 
-    print("[$rootDomain]:[$publicTld] => [$registrableDomain]");
+  String _decodeHost(Uri uri) {
+    var host = uri.host.replaceAll(RegExp(r'\.+$'), '').toLowerCase();
+    host = Uri.decodeComponent(host);
+
+    var punycodes = RegExp(r'xn--[a-z0-9-]+').allMatches(host);
+
+    if (punycodes.isNotEmpty) {
+      _sourcePunycoded = true;
+      int offset = 0;
+      punycodes.forEach((match) {
+        var decoded = punycodeDecode(match.group(0).substring(4));
+        host = host.replaceRange(
+            match.start - offset, match.end - offset, decoded);
+        offset += (match.end - match.start) - decoded.length;
+      });
+    }
+
+    return host;
   }
 
   _findMatchingRules(String host, List<String> suffixList) {
@@ -123,7 +170,7 @@ class PublicSuffix {
 
     var index = host.length;
     for (int i = 0; i < ruleLength; i++) {
-      index = host.lastIndexOf('.', index-1);
+      index = host.lastIndexOf('.', index - 1);
     }
 
     if (index == -1) {
@@ -133,8 +180,8 @@ class PublicSuffix {
     }
   }
 
-  String _getDomainRoot(Uri uri, String publicSuffix) {
-    var domainRoot = uri.host.substring(0, uri.host.lastIndexOf(publicSuffix));
+  String _getDomainRoot(String host, String publicSuffix) {
+    var domainRoot = host.substring(0, host.lastIndexOf(publicSuffix));
 
     if (domainRoot == '.' || domainRoot.isEmpty) {
       domainRoot = '';
@@ -145,5 +192,17 @@ class PublicSuffix {
     }
 
     return domainRoot;
+  }
+
+  String _punyEncode(String input) {
+    return input.split('.').map((part) {
+      var puny = punycodeEncode(part);
+
+      if (puny != "$part-" && puny != part) {
+        return "xn--$puny";
+      } else {
+        return part;
+      }
+    }).join('.');
   }
 }

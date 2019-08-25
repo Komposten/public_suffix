@@ -210,4 +210,28 @@ class Rule {
       return true;
     }
   }
+
+  int _compareTo(Rule other) {
+    var itr = RuneIterator.at(labels, labels.length);
+    var itr2 = RuneIterator.at(other.labels, other.labels.length);
+    var diff = 0;
+
+    while (itr.movePrevious() && itr2.movePrevious()) {
+      diff = itr.current - itr2.current;
+
+      if (diff != 0) {
+        return diff;
+      }
+    }
+
+    return 0;
+  }
+
+  bool operator <=(Rule other) => _compareTo(other) <= 0;
+
+  bool operator <(Rule other) => _compareTo(other) < 0;
+
+  bool operator >=(Rule other) => _compareTo(other) >= 0;
+
+  bool operator >(Rule other) => _compareTo(other) > 0;
 }

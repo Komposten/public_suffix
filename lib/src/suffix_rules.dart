@@ -14,14 +14,23 @@
 /// can be disposed of using [dispose] if it is no longer needed.
 class SuffixRules {
   static List<Rule> _rules;
+  static Map<String, Iterable<Rule>> _ruleMap;
 
   SuffixRules._();
 
-  /// Returns an unmodifiable list containing the current rules.
+  /// Returns an unmodifiable list containing the current rules in the original order.
   ///
   /// [null] is returned if the list has not been initialised.
   static List<Rule> get rules =>
       _rules != null ? List.unmodifiable(_rules) : null;
+
+  /// Returns an unmodifiable map containing the current rules.
+  ///
+  /// In each pair in the list the key is a label and the value a list of all
+  /// rules that end with that label.
+  /// [null] is returned if the map has not been initialised.
+  static Map<String, Iterable<Rule>> get ruleMap =>
+      _ruleMap != null ? Map.unmodifiable(_ruleMap) : null;
 
   /// Checks if the rule list has been initialised.
   static bool hasInitialised() => _rules != null;
@@ -43,6 +52,7 @@ class SuffixRules {
     var processed = process(rules);
     validate(processed);
     _rules = processed;
+    _ruleMap = _listToMap(_rules);
   }
 
   /// Converts a list of strings into a list of rules.
@@ -122,6 +132,21 @@ class SuffixRules {
   static bool _isValidRule(String line) =>
       RegExp(r'^(?:\*|[^*.!\s][^*.!\s]*)(?:\.(?:[*]|[^*.\s]+))*$')
           .hasMatch(line);
+
+  static Map<String, Iterable<Rule>> _listToMap(List<Rule> rules) {
+    var map = <String, List<Rule>>{};
+    for (var rule in rules) {
+      var lastLabel = rule.labels.substring(rule.labels.lastIndexOf('.') + 1);
+      if (map.containsKey(lastLabel)) {
+        map[lastLabel].add(rule);
+      } else {
+        var list = <Rule>[rule];
+        map[lastLabel] = list;
+      }
+    }
+
+    return map;
+  }
 
   /// Disposes of the suffix list.
   ///

@@ -94,12 +94,12 @@ class PublicSuffix {
           "The URI is missing the authority component: $sourceUri");
     }
 
-    _parseUri(sourceUri, SuffixRules.rules);
+    _parseUri(sourceUri, SuffixRules.ruleMap);
   }
 
-  void _parseUri(Uri uri, List<Rule> suffixList) {
+  void _parseUri(Uri uri, Map<String, Iterable<Rule>> suffixMap) {
     var host = _decodeHost(uri);
-    var matchingRules = _findMatchingRules(host, suffixList);
+    var matchingRules = _findMatchingRules(host, suffixMap);
     var prevailingIcannRule = _getPrevailingRule(matchingRules['icann']);
     var prevailingAllRule = _getPrevailingRule(matchingRules['all']);
 
@@ -149,16 +149,21 @@ class PublicSuffix {
   }
 
   Map<String, List<Rule>> _findMatchingRules(
-      String host, List<Rule> suffixList) {
+      String host, Map<String, Iterable<Rule>> suffixMap) {
     var icannMatches = <Rule>[];
     var allMatches = <Rule>[];
 
-    for (var rule in suffixList) {
-      if (_ruleMatches(rule, host)) {
-        allMatches.add(rule);
+    var lastLabel = host.substring(host.lastIndexOf(('.')) + 1);
+    var suffixList = suffixMap[lastLabel];
 
-        if (rule.isIcann) {
-          icannMatches.add(rule);
+    if (suffixList != null) {
+      for (var rule in suffixList) {
+        if (_ruleMatches(rule, host)) {
+          allMatches.add(rule);
+
+          if (rule.isIcann) {
+            icannMatches.add(rule);
+          }
         }
       }
     }

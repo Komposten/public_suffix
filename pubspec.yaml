@@ -1,6 +1,6 @@
 name: public_suffix
 description: A domain parser based on the Public Suffix List, for identifying the root and suffix/TLD of URLs.
-version: 1.1.0
+version: 1.2.0-dev
 homepage: https://www.github.com/komposten/
 repository: https://www.github.com/komposten/public_suffix
 issue_tracker: https://www.github.com/komposten/public_suffix/issues

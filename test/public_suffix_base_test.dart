@@ -43,7 +43,8 @@ void main() {
       expect(suffix.domain, equals("${suffix.root}.${suffix.suffix}"));
     });
 
-    test('urlWithoutRegistrableDomain_registrableDomainAndSubdomainAreNull', () {
+    test('urlWithoutRegistrableDomain_registrableDomainAndSubdomainAreNull',
+        () {
       var suffix = PublicSuffix(Uri.parse('http://dev'));
 
       expect(suffix.root, isEmpty);
@@ -185,7 +186,8 @@ void main() {
     });
 
     test('punycodedUrl_punydecodedInstanceHasDecodedData', () {
-      var suffix = PublicSuffix(Uri.parse('http://xn--6qq79v.xn--85x722f.xn--55qx5d.cn'));
+      var suffix = PublicSuffix(
+          Uri.parse('http://xn--6qq79v.xn--85x722f.xn--55qx5d.cn'));
       expect(suffix.suffix, equals('xn--55qx5d.cn'));
       expect(suffix.root, equals('xn--85x722f'));
       expect(suffix.subdomain, equals('xn--6qq79v'));

@@ -163,23 +163,29 @@ void main() {
     });
 
     test('githubIoUrl_differentOverallAndIcannData', () {
-      var suffix = PublicSuffix(Uri.parse('http://komposten.github.io'));
+      var suffix = PublicSuffix(Uri.parse('http://sub.komposten.github.io'));
       expect(suffix.root, equals('komposten'));
       expect(suffix.suffix, equals('github.io'));
+      expect(suffix.subdomain, equals('sub'));
       expect(suffix.icannRoot, equals('github'));
       expect(suffix.icannSuffix, equals('io'));
+      expect(suffix.icannSubdomain, equals('sub.komposten'));
       expect(suffix.punyDecoded.root, equals('komposten'));
       expect(suffix.punyDecoded.suffix, equals('github.io'));
+      expect(suffix.punyDecoded.subdomain, equals('sub'));
       expect(suffix.punyDecoded.icannRoot, equals('github'));
       expect(suffix.punyDecoded.icannSuffix, equals('io'));
+      expect(suffix.punyDecoded.icannSubdomain, equals('sub.komposten'));
     });
 
     test('punycodedUrl_punydecodedInstanceHasDecodedData', () {
-      var suffix = PublicSuffix(Uri.parse('http://xn--85x722f.xn--55qx5d.cn'));
-      expect(suffix.root, equals('xn--85x722f'));
+      var suffix = PublicSuffix(Uri.parse('http://xn--6qq79v.xn--85x722f.xn--55qx5d.cn'));
       expect(suffix.suffix, equals('xn--55qx5d.cn'));
-      expect(suffix.punyDecoded.root, equals('食狮'));
+      expect(suffix.root, equals('xn--85x722f'));
+      expect(suffix.subdomain, equals('xn--6qq79v'));
       expect(suffix.punyDecoded.suffix, equals('公司.cn'));
+      expect(suffix.punyDecoded.root, equals('食狮'));
+      expect(suffix.punyDecoded.subdomain, equals('你好'));
     });
 
     test('notPunycodedUrl_punydecodedInstanceHasSameData', () {

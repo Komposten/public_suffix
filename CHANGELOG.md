@@ -1,3 +1,7 @@
+## 1.2.0
+- Added a hash map-based `ruleMap` to `SuffixRules` to speed up the performance when matching rules.
+- Added `subdomain` and `icannSubdomain` to `PublicSuffix`.
+
 ## 1.1.0
 - Added primary library `public_suffix.dart`, which can be used without `dart:io` and `dart:html` (but still requires to be initialised with a suffix list).
 

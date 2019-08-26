@@ -20,9 +20,11 @@ class PublicSuffix {
   String _root;
   String _suffix;
   String _domain;
+  String _subdomain;
   String _icannRoot;
   String _icannSuffix;
   String _icannDomain;
+  String _icannSubdomain;
 
   PublicSuffix _punyDecoded;
 
@@ -31,6 +33,13 @@ class PublicSuffix {
   /// The registrable domain is the public suffix and one preceding label.
   /// For example, `images.google.co.uk` has the registrable domain `google.co.uk`.
   String get domain => _domain;
+
+  /// Returns the subdomain part of the URI, based on both ICANN/IANA and private rules.
+  ///
+  /// The subdomain is the part of the host that precedes the registrable domain
+  /// (see [domain]).
+  /// For example, `images.google.co.uk` has the subdomain `images`.
+  String get subdomain => _subdomain;
 
   /// Returns the root domain part of the URI, based on both ICANN/IANA and private rules.
   ///
@@ -50,6 +59,13 @@ class PublicSuffix {
   /// The registrable domain is the public suffix and one preceding label.
   /// For example, `images.google.co.uk` has the registrable domain `google.co.uk`.
   String get icannDomain => _icannDomain;
+
+  /// Returns the subdomain part of the URI, based on ICANN/IANA rules.
+  ///
+  /// The subdomain is the part of the host that precedes the registrable domain
+  /// (see [domain]).
+  /// For example, `images.google.co.uk` has the subdomain `images`.
+  String get icannSubdomain => _icannSubdomain;
 
   /// Returns the root domain part of the URI, based on ICANN/IANA rules.
   ///
@@ -73,10 +89,12 @@ class PublicSuffix {
   /// `icann`-prefixed getters.
   bool isPrivateSuffix() => icannSuffix != _suffix;
 
-  PublicSuffix._(this.sourceUri, this._root, this._suffix, this._icannRoot,
+  PublicSuffix._(this.sourceUri, String host, this._root, this._suffix, this._icannRoot,
       this._icannSuffix) {
     _domain = _buildRegistrableDomain(_root, _suffix);
     _icannDomain = _buildRegistrableDomain(_icannRoot, _icannSuffix);
+    _subdomain = _getSubdomain(host, _domain);
+    _icannSubdomain = _getSubdomain(host, _icannDomain);
   }
 
   /// Creates a new instance based on the specified [sourceUri].
@@ -117,14 +135,16 @@ class PublicSuffix {
     _suffix = allData['suffix'];
     _root = allData['root'];
     _domain = allData['registrable'];
+    _subdomain = allData['sub'];
     _icannSuffix = icannData['suffix'];
     _icannRoot = icannData['root'];
     _icannDomain = icannData['registrable'];
+    _icannSubdomain = icannData['sub'];
 
     var puny = allData['puny'];
     var icannPuny = icannData['puny'];
 
-    _punyDecoded = PublicSuffix._(sourceUri, puny['root'], puny['suffix'],
+    _punyDecoded = PublicSuffix._(sourceUri, host, puny['root'], puny['suffix'],
         icannPuny['root'], icannPuny['suffix']);
   }
 
@@ -235,17 +255,20 @@ class PublicSuffix {
     var puny = {'root': root, 'suffix': suffix};
 
     if (_sourcePunycoded) {
+      host = _punyEncode(host);
       suffix = _punyEncode(suffix);
       root = _punyEncode(root);
     }
 
     var registrable = _buildRegistrableDomain(root, suffix);
+    var sub = _getSubdomain(host, registrable);
 
     return {
       'suffix': suffix,
       'root': root,
       'puny': puny,
-      'registrable': registrable
+      'registrable': registrable,
+      'sub': sub
     };
   }
 
@@ -292,5 +315,14 @@ class PublicSuffix {
 
   String _buildRegistrableDomain(String root, String suffix) {
     return (root.isNotEmpty ? "$root.$suffix" : null);
+  }
+
+  String _getSubdomain(String host, String registrableDomain) {
+    if (registrableDomain == null) {
+      return null;
+    } else {
+      var index = host.lastIndexOf(registrableDomain);
+      return host.substring(0, index == 0 ? index : index - 1);
+    }
   }
 }

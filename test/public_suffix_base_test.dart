@@ -43,12 +43,18 @@ void main() {
       expect(suffix.domain, equals("${suffix.root}.${suffix.suffix}"));
     });
 
-    test('urlWithoutRegistrableDomain_registrableDomainIsNull', () {
+    test('urlWithoutRegistrableDomain_registrableDomainAndSubdomainAreNull', () {
       var suffix = PublicSuffix(Uri.parse('http://dev'));
 
       expect(suffix.root, isEmpty);
       expect(suffix.suffix, equals('dev'));
       expect(suffix.domain, isNull);
+      expect(suffix.subdomain, isNull);
+    });
+
+    test('urlWithoutSubdomain_subdomainIsNull', () {
+      var suffix = PublicSuffix(Uri.parse('http://pub.dev'));
+      expect(suffix.subdomain, isNull);
     });
 
     test('basicUrls_correctlyIdentifyRootAndTld', () {

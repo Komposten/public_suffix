@@ -89,8 +89,8 @@ class PublicSuffix {
   /// `icann`-prefixed getters.
   bool isPrivateSuffix() => icannSuffix != _suffix;
 
-  PublicSuffix._(this.sourceUri, String host, this._root, this._suffix, this._icannRoot,
-      this._icannSuffix) {
+  PublicSuffix._(this.sourceUri, String host, this._root, this._suffix,
+      this._icannRoot, this._icannSuffix) {
     _domain = _buildRegistrableDomain(_root, _suffix);
     _icannDomain = _buildRegistrableDomain(_icannRoot, _icannSuffix);
     _subdomain = _getSubdomain(host, _domain);
@@ -318,11 +318,16 @@ class PublicSuffix {
   }
 
   String _getSubdomain(String host, String registrableDomain) {
-    if (registrableDomain == null) {
-      return null;
-    } else {
+    var sub;
+
+    if (registrableDomain != null) {
       var index = host.lastIndexOf(registrableDomain);
-      return host.substring(0, index == 0 ? index : index - 1);
+
+      if (index > 0) {
+        sub = host.substring(0, index - 1);
+      }
     }
+
+    return sub;
   }
 }

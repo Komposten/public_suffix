@@ -6,8 +6,8 @@ void main() {
   tearDown(() => SuffixRules.dispose());
 
   test('initPublicSuffixList_crossDomainUrl_initList', () async {
-    await SuffixRulesHelper.initFromUri(
-        Uri.parse('https://publicsuffix.org/list/public_suffix_list.dat'));
+    await SuffixRulesHelper.initFromUri(Uri.parse(
+        'https://raw.githubusercontent.com/Komposten/public_suffix/master/test/res/public_suffix_list.dat'));
     expect(SuffixRules.hasInitialised(), isTrue);
     expect(SuffixRules.rules, isNotEmpty);
   });

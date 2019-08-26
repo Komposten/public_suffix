@@ -54,7 +54,7 @@ class SuffixRulesHelper {
         object = e.target;
       }
 
-      if (e is HttpRequest) {
+      if (object is HttpRequest) {
         throw Exception(
             "Request for public suffix list failed: [${object.status}] ${object.statusText}");
       } else {

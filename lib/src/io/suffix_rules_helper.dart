@@ -46,14 +46,17 @@ class SuffixRulesHelper {
   }
 
   static Future<void> _initFromUrl(Uri uri) async {
-    try {
-      var request = await HttpClient().getUrl(uri);
-      var response = await request.close();
-      var data = await response.transform(Utf8Decoder()).join();
+    var request = await HttpClient().getUrl(uri);
+    var response = await request.close();
 
-      SuffixRules.initFromString(data);
-    } catch (e) {
-      rethrow;
+    switch (response.statusCode) {
+      case 200:
+        var data = await response.transform(Utf8Decoder()).join();
+        SuffixRules.initFromString(data);
+        break;
+      default:
+        throw Exception(
+            "Request for public suffix list failed: [${response.statusCode}]");
     }
   }
 }

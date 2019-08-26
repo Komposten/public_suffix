@@ -13,6 +13,12 @@ void main() {
     expect(SuffixRules.rules, isNotEmpty);
   });
 
+  test('initPublicSuffixList_resourceDoesNotExist_fail', () async {
+    var uri = Uri.parse(
+        "https://raw.githubusercontent.com/Komposten/public_suffix/master/test/res/i_dont_exist.dat");
+    expect(SuffixRulesHelper.initFromUri(uri), throwsException);
+  });
+
   test('initPublicSuffixList_invalidUrl_throwException', () async {
     expect(
         SuffixRulesHelper.initFromUri(Uri.parse('http://127.0.0.2/list.dat')),

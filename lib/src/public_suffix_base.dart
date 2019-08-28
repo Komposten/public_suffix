@@ -89,6 +89,29 @@ class PublicSuffix {
   /// `icann`-prefixed getters.
   bool isPrivateSuffix() => icannSuffix != _suffix;
 
+  /// Checks if this object represents a subdomain of another.
+  ///
+  /// The domain and subdomain properties are compared to determine if
+  /// this object represents a subdomain of [other]. If [icann] is [true],
+  /// comparison will be based on only the ICANN/IANA rules.
+  ///
+  /// For example, `http://images.google.co.uk` is a subdomain of `http://google.co.uk`.
+  ///
+  /// If [other] has a subdomain and this object represents a subdomain of that,
+  /// [true] is still returned.
+  bool isSubdomainOf(PublicSuffix other, {bool icann = false}) {
+    if (icann) {
+      return icannDomain == other.icannDomain &&
+          icannSubdomain != null &&
+          (other.icannSubdomain == null ||
+              icannSubdomain.endsWith(other.icannSubdomain));
+    } else {
+      return domain == other.domain &&
+          subdomain != null &&
+          (other.subdomain == null || subdomain.endsWith(other.subdomain));
+    }
+  }
+
   PublicSuffix._(this.sourceUri, String host, this._root, this._suffix,
       this._icannRoot, this._icannSuffix) {
     _domain = _buildRegistrableDomain(_root, _suffix);

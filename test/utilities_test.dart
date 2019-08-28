@@ -13,62 +13,31 @@ void main() {
   });
 
   group('isSubdomainOf_', () {
-    test('subdomainOfRoot_true', () {
-      expect(
-          DomainUtils.isSubdomainOf(Uri.parse('http://images.google.co.uk'),
-              Uri.parse('http://google.co.uk')),
-          isTrue);
-    });
+    void testSubdomainOf(String domain1, String domain2, {bool icann = false}) {
+      var uri1 = Uri.parse(domain1);
+      var uri2 = Uri.parse(domain2);
+      var publicSuffix1 = PublicSuffix(uri1);
+      var publicSuffix2 = PublicSuffix(uri2);
 
-    test('subdomainOfSubdomain_true', () {
-      expect(
-          DomainUtils.isSubdomainOf(
-              Uri.parse('http://deeper.images.google.co.uk'),
-              Uri.parse('http://images.google.co.uk')),
-          isTrue);
-    });
+      expect(DomainUtils.isSubdomainOf(uri1, uri2),
+          equals(publicSuffix1.isSubdomainOf(publicSuffix2)));
+    }
 
-    test('differentSubdomains_false', () {
-      expect(
-          DomainUtils.isSubdomainOf(Uri.parse('http://images.google.co.uk'),
-              Uri.parse('http://photos.google.co.uk')),
-          isFalse);
-      expect(
-          DomainUtils.isSubdomainOf(
-              Uri.parse('http://deeper.images.google.co.uk'),
-              Uri.parse('http://deeper.images.photos.google.co.uk')),
-          isFalse);
-    });
-
-    test('noSubdomain_false', () {
-      expect(
-          DomainUtils.isSubdomainOf(Uri.parse('http://google.co.uk'),
-              Uri.parse('http://google.co.uk')),
-          isFalse);
-    });
-
-    test('differentDomains_false', () {
-      expect(
-          DomainUtils.isSubdomainOf(Uri.parse('http://images.google.co.uk'),
-              Uri.parse('http://google.com')),
-          isFalse);
-      expect(
-          DomainUtils.isSubdomainOf(Uri.parse('http://images.google.co.uk'),
-              Uri.parse('http://googol.co.uk')),
-          isFalse);
-    });
-
-    test('icann', () {
-      expect(
-          DomainUtils.isSubdomainOf(Uri.parse('http://komposten.github.io'),
-              Uri.parse('http://github.io'),
-              icann: false),
-          isFalse);
-      expect(
-          DomainUtils.isSubdomainOf(Uri.parse('http://komposten.github.io'),
-              Uri.parse('http://github.io'),
-              icann: true),
-          isTrue);
+    test('variousSituations_sameResultAsPublicSuffixIsSubdomain', () {
+      testSubdomainOf('http://images.google.co.uk', 'http://google.co.uk');
+      testSubdomainOf(
+          'http://deeper.images.google.co.uk', 'http://images.google.co.uk');
+      testSubdomainOf(
+          'http://images.google.co.uk', 'http://photos.google.co.uk');
+      testSubdomainOf('http://deeper.images.google.co.uk',
+          'http://deeper.images.photos.google.co.uk');
+      testSubdomainOf('http://google.co.uk', 'http://google.co.uk');
+      testSubdomainOf('http://images.google.co.uk', 'http://google.com');
+      testSubdomainOf('http://images.google.co.uk', 'http://googol.co.uk');
+      testSubdomainOf('http://komposten.github.io', 'http://github.io',
+          icann: false);
+      testSubdomainOf('http://komposten.github.io', 'http://github.io',
+          icann: true);
     });
   });
 

@@ -224,4 +224,70 @@ void main() {
 
     tearDownAll(() => SuffixRules.dispose());
   });
+
+  group('isSubdomainOf_', () {
+    setUpAll(() async {
+      await SuffixRulesHelper.initFromUri(getSuffixListFileUri());
+    });
+
+    test('subdomainOfRoot_true', () {
+      expect(
+          PublicSuffix(Uri.parse('http://images.google.co.uk'))
+              .isSubdomainOf(PublicSuffix(Uri.parse('http://google.co.uk'))),
+          isTrue);
+    });
+
+    test('subdomainOfSubdomain_true', () {
+      expect(
+          PublicSuffix(Uri.parse('http://deeper.images.google.co.uk'))
+              .isSubdomainOf(
+                  PublicSuffix(Uri.parse('http://images.google.co.uk'))),
+          isTrue);
+    });
+
+    test('differentSubdomains_false', () {
+      expect(
+          PublicSuffix(Uri.parse('http://images.google.co.uk')).isSubdomainOf(
+              PublicSuffix(Uri.parse('http://photos.google.co.uk'))),
+          isFalse);
+      expect(
+          PublicSuffix(Uri.parse('http://deeper.images.google.co.uk'))
+              .isSubdomainOf(PublicSuffix(
+                  Uri.parse('http://deeper.images.photos.google.co.uk'))),
+          isFalse);
+    });
+
+    test('noSubdomain_false', () {
+      expect(
+          PublicSuffix(Uri.parse('http://google.co.uk'))
+              .isSubdomainOf(PublicSuffix(Uri.parse('http://google.co.uk'))),
+          isFalse);
+    });
+
+    test('differentDomains_false', () {
+      expect(
+          PublicSuffix(Uri.parse('http://images.google.co.uk'))
+              .isSubdomainOf(PublicSuffix(Uri.parse('http://google.com'))),
+          isFalse);
+      expect(
+          PublicSuffix(Uri.parse('http://images.google.co.uk'))
+              .isSubdomainOf(PublicSuffix(Uri.parse('http://googol.co.uk'))),
+          isFalse);
+    });
+
+    test('icann', () {
+      expect(
+          PublicSuffix(Uri.parse('http://komposten.github.io')).isSubdomainOf(
+              PublicSuffix(Uri.parse('http://github.io')),
+              icann: false),
+          isFalse);
+      expect(
+          PublicSuffix(Uri.parse('http://komposten.github.io')).isSubdomainOf(
+              PublicSuffix(Uri.parse('http://github.io')),
+              icann: true),
+          isTrue);
+    });
+
+    tearDownAll(() => SuffixRules.dispose());
+  });
 }

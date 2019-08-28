@@ -14,30 +14,13 @@ class DomainUtils {
 
   /// Checks if a URI is a subdomain of another.
   ///
-  /// Both URIs are parsed to [PublicSuffix] objects, whose domain and subdomain
-  /// properties are then compared to determine if [potentialSub] is a subdomain
-  /// of [root]. If [icann] is [true], comparison will be based on only the
-  /// ICANN/IANA rules.
-  ///
-  /// For example, `http://images.google.co.uk` is a subdomain of `http://google.co.uk`.
-  ///
-  /// If [root] has a subdomain and [potentialSub] is a subdomain of that, [true]
-  /// is still returned.
+  /// Both URIs are parsed to [PublicSuffix] objects, which are then compared
+  /// using [PublicSuffix.isSubdomainOf()].
   static bool isSubdomainOf(Uri potentialSub, Uri root, {bool icann = false}) {
     var parsedUri = PublicSuffix(potentialSub);
     var parsedRoot = PublicSuffix(root);
 
-    if (icann) {
-      return parsedUri.icannDomain == parsedRoot.icannDomain &&
-          parsedUri.icannSubdomain != null &&
-          (parsedRoot.icannSubdomain == null ||
-              parsedUri.icannSubdomain.endsWith(parsedRoot.icannSubdomain));
-    } else {
-      return parsedUri.domain == parsedRoot.domain &&
-          parsedUri.subdomain != null &&
-          (parsedRoot.subdomain == null ||
-              parsedUri.subdomain.endsWith(parsedRoot.subdomain));
-    }
+    return parsedUri.isSubdomainOf(parsedRoot, icann: icann);
   }
 
   /// Checks if a URI is a subdomain or a root domain.

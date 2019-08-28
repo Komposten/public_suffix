@@ -19,8 +19,8 @@ void main() {
       var publicSuffix1 = PublicSuffix(uri1);
       var publicSuffix2 = PublicSuffix(uri2);
 
-      expect(DomainUtils.isSubdomainOf(uri1, uri2),
-          equals(publicSuffix1.isSubdomainOf(publicSuffix2)));
+      expect(DomainUtils.isSubdomainOf(uri1, uri2, icann: icann),
+          equals(publicSuffix1.isSubdomainOf(publicSuffix2, icann: icann)));
     }
 
     test('variousSituations_sameResultAsPublicSuffixIsSubdomain', () {

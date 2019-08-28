@@ -10,3 +10,4 @@
 
 export 'src/public_suffix_base.dart';
 export 'src/suffix_rules.dart';
+export 'src/utilities.dart';

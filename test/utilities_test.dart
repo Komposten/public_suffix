@@ -71,4 +71,31 @@ void main() {
           isTrue);
     });
   });
+
+  group('isSubdomain', () {
+    test('rootDomain_false', () {
+      expect(
+          DomainUtils.isSubdomain(Uri.parse('http://google.co.uk')), isFalse);
+    });
+
+    test('subdomains_true', () {
+      expect(DomainUtils.isSubdomain(Uri.parse('http://images.google.co.uk')),
+          isTrue);
+      expect(
+          DomainUtils.isSubdomain(
+              Uri.parse('http://deeper.images.google.co.uk')),
+          isTrue);
+    });
+
+    test('icann', () {
+      expect(
+          DomainUtils.isSubdomain(Uri.parse('http://komposten.github.io'),
+              icann: false),
+          isFalse);
+      expect(
+          DomainUtils.isSubdomain(Uri.parse('http://komposten.github.io'),
+              icann: true),
+          isTrue);
+    });
+  });
 }

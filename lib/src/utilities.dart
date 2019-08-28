@@ -39,4 +39,18 @@ class DomainUtils {
               parsedUri.subdomain.endsWith(parsedRoot.subdomain));
     }
   }
+
+  /// Checks if a URI is a subdomain or a root domain.
+  ///
+  /// [potentialSub] is parsed to a [PublicSuffix] object. It is a subdomain if
+  /// the [subdomain] property of the object is [null].
+  ///
+  /// If [icann] is [true], [icannSubdomain] is checked instead.
+  static bool isSubdomain(Uri potentialSub, {bool icann = false}) {
+    if (icann) {
+      return PublicSuffix(potentialSub).icannSubdomain != null;
+    } else {
+      return PublicSuffix(potentialSub).subdomain != null;
+    }
+  }
 }

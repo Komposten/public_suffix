@@ -82,4 +82,27 @@ void main() {
       expect(DomainUtils.isKnownSuffix('hamster.io'), isFalse);
     });
   });
+
+  group('hasValidDomain_', () {
+    void testValidDomain(String domain,
+        {bool icann = false, bool defaultRule = true}) {
+      var uri = Uri.parse(domain);
+      var publicSuffix1 = PublicSuffix(uri);
+
+      expect(
+          DomainUtils.hasValidDomain(uri,
+              icann: icann, acceptDefaultRule: defaultRule),
+          equals(publicSuffix1.hasValidDomain(
+              icann: icann, acceptDefaultRule: defaultRule)));
+    }
+
+    test('variousSituations_sameResultAsPublicSuffiHasValidDomain', () {
+      testValidDomain('http://google.co.uk');
+      testValidDomain('http://komposten.github.io');
+      testValidDomain('http://co.uk');
+      testValidDomain('http://github.io');
+      testValidDomain('http://github.io', icann: true);
+      testValidDomain('http://example.example', defaultRule: false);
+    });
+  });
 }

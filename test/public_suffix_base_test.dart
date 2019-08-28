@@ -321,4 +321,45 @@ void main() {
 
     tearDownAll(() => SuffixRules.dispose());
   });
+
+  group('hasValidDomain_', () {
+    setUpAll(() async {
+      await SuffixRulesHelper.initFromUri(getSuffixListFileUri());
+    });
+
+    test('validDomains_true', () {
+      expect(PublicSuffix(Uri.parse('http://google.co.uk')).hasValidDomain(),
+          isTrue);
+      expect(
+          PublicSuffix(Uri.parse('http://komposten.github.io'))
+              .hasValidDomain(),
+          isTrue);
+    });
+
+    test('invalidDomains_false', () {
+      expect(PublicSuffix(Uri.parse('http://co.uk')).hasValidDomain(), isFalse);
+      expect(PublicSuffix(Uri.parse('http://github.io')).hasValidDomain(),
+          isFalse);
+    });
+
+    test('icann', () {
+      expect(PublicSuffix(Uri.parse('http://github.io')).hasValidDomain(),
+          isFalse);
+      expect(
+          PublicSuffix(Uri.parse('http://github.io'))
+              .hasValidDomain(icann: true),
+          isTrue);
+    });
+
+    test('dontAcceptDefaultRule', () {
+      expect(PublicSuffix(Uri.parse('http://example.example')).hasValidDomain(),
+          isTrue);
+      expect(
+          PublicSuffix(Uri.parse('http://example.example'))
+              .hasValidDomain(acceptDefaultRule: false),
+          isFalse);
+    });
+
+    tearDownAll(() => SuffixRules.dispose());
+  });
 }

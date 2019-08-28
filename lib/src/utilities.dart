@@ -55,4 +55,15 @@ class DomainUtils {
 
     return isKnown;
   }
+
+  /// Checks if the URL contains a registrable domain part.
+  ///
+  /// If [icann] is [true] the check will be based on only the ICANN/IANA rules.
+  /// If [acceptDefaultRule] is [false] URLs with suffixes only matching the
+  /// default rule (`*`) will be seen as invalid.
+  static bool hasValidDomain(Uri domain,
+      {bool icann = false, bool acceptDefaultRule = true}) {
+    return PublicSuffix(domain)
+        .hasValidDomain(icann: icann, acceptDefaultRule: acceptDefaultRule);
+  }
 }

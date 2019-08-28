@@ -95,6 +95,22 @@ class PublicSuffix {
   /// A known suffix is one which has a rule in the suffix rule list.
   bool hasKnownSuffix() => _hasKnownSuffix;
 
+  /// Checks if the registrable domain is valid.
+  ///
+  /// If [icann] is [true] the check will be based on [icannDomain], otherwise
+  /// [domain] is used.
+  /// If [acceptDefaultRule] is [false] URLs with suffixes only matching the
+  /// default rule (`*`) will be seen as invalid.
+  bool hasValidDomain({bool icann = false, bool acceptDefaultRule = true}) {
+    var _domain = (icann ? icannDomain : domain);
+
+    if (acceptDefaultRule || hasKnownSuffix()) {
+      return _domain != null;
+    } else {
+      return false;
+    }
+  }
+
   /// Checks if this object represents a subdomain of another.
   ///
   /// The domain and subdomain properties are compared to determine if

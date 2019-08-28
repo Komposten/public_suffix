@@ -67,4 +67,19 @@ void main() {
           isTrue);
     });
   });
+
+  group('isKnownSuffix', () {
+    test('knownSuffixes_true', () {
+      // Exact matches
+      expect(DomainUtils.isKnownSuffix('co.uk'), isTrue);
+      expect(DomainUtils.isKnownSuffix('github.io'), isTrue);
+      // Wildcard matches
+      expect(DomainUtils.isKnownSuffix('cat.moonscale.io'), isTrue);
+    });
+
+    test('unknownSuffixes_false', () {
+      expect(DomainUtils.isKnownSuffix('example'), isFalse);
+      expect(DomainUtils.isKnownSuffix('hamster.io'), isFalse);
+    });
+  });
 }

@@ -290,4 +290,35 @@ void main() {
 
     tearDownAll(() => SuffixRules.dispose());
   });
+
+  group('hasKnownSuffix_', () {
+    setUpAll(() async {
+      await SuffixRulesHelper.initFromUri(getSuffixListFileUri());
+    });
+
+    test('knownSuffixes_true', () {
+      // Exact matches
+      expect(PublicSuffix(Uri.parse('http://google.co.uk')).hasKnownSuffix(),
+          isTrue);
+      expect(
+          PublicSuffix(Uri.parse('http://komposten.github.io'))
+              .hasKnownSuffix(),
+          isTrue);
+      // Wildcard matches
+      expect(
+          PublicSuffix(Uri.parse('http://mouse.cat.moonscale.io'))
+              .hasKnownSuffix(),
+          isTrue);
+    });
+
+    test('unknownSuffixes_false', () {
+      expect(PublicSuffix(Uri.parse('http://example.example')).hasKnownSuffix(),
+          isFalse);
+      expect(
+          PublicSuffix(Uri.parse('http://komposten.hamster')).hasKnownSuffix(),
+          isFalse);
+    });
+
+    tearDownAll(() => SuffixRules.dispose());
+  });
 }

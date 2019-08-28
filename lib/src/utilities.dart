@@ -36,4 +36,23 @@ class DomainUtils {
       return PublicSuffix(potentialSub).subdomain != null;
     }
   }
+
+  /// Checks if [suffix] is a known url suffix.
+  ///
+  /// For example, `co.uk` is known but `example` is not.
+  static bool isKnownSuffix(String suffix) {
+    var split = suffix.split('.');
+    var rules = SuffixRules.ruleMap[split.last] ?? <String>[];
+    var isKnown = false;
+
+    for (var rule in rules) {
+      if (rule.labels.split('.').length == split.length &&
+          rule.matches(suffix)) {
+        isKnown = true;
+        break;
+      }
+    }
+
+    return isKnown;
+  }
 }

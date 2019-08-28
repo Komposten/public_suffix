@@ -169,9 +169,30 @@ class Rule {
   /// If the rule is an ICANN/IANA rule.
   final bool isIcann;
 
+  List<int> _wildcards;
+
   Rule(String rule, {this.isIcann = true})
       : isException = rule.startsWith('!'),
-        labels = rule.startsWith('!') ? rule.substring(1) : rule;
+        labels = rule.startsWith('!') ? rule.substring(1) : rule {
+    _wildcards = '*'.allMatches(labels).map((m) => m.start).toList();
+  }
+
+  bool matches(String host) {
+    var hostParts = host.split('.')..removeWhere((e) => e.isEmpty);
+    var ruleParts = labels.split('.');
+
+    if (ruleParts.length <= hostParts.length) {
+      hostParts = hostParts.sublist(hostParts.length - ruleParts.length);
+
+      if (_wildcards.isNotEmpty) {
+        for (var index in _wildcards) {
+          hostParts[index] = '*';
+        }
+      }
+    }
+
+    return labels == hostParts.join('.');
+  }
 
   @override
   String toString() {

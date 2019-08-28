@@ -17,6 +17,7 @@ class PublicSuffix {
   final Uri sourceUri;
 
   bool _sourcePunycoded = false;
+  bool _hasKnownSuffix;
   String _root;
   String _suffix;
   String _domain;
@@ -88,6 +89,11 @@ class PublicSuffix {
   /// If [true], then [root], [suffix] and [domain] will be different from the
   /// `icann`-prefixed getters.
   bool isPrivateSuffix() => icannSuffix != _suffix;
+
+  /// Whether the [suffix] is a known suffix or not.
+  ///
+  /// A known suffix is one which has a rule in the suffix rule list.
+  bool hasKnownSuffix() => _hasKnownSuffix;
 
   /// Checks if this object represents a subdomain of another.
   ///
@@ -163,6 +169,7 @@ class PublicSuffix {
     _icannRoot = icannData['root'];
     _icannDomain = icannData['registrable'];
     _icannSubdomain = icannData['sub'];
+    _hasKnownSuffix = (prevailingAllRule.labels != "*");
 
     var puny = allData['puny'];
     var icannPuny = icannData['puny'];
@@ -201,7 +208,7 @@ class PublicSuffix {
 
     if (suffixList != null) {
       for (var rule in suffixList) {
-        if (_ruleMatches(rule, host)) {
+        if (rule.matches(host)) {
           allMatches.add(rule);
 
           if (rule.isIcann) {
@@ -212,37 +219,6 @@ class PublicSuffix {
     }
 
     return {'icann': icannMatches, 'all': allMatches};
-  }
-
-  bool _ruleMatches(Rule rule, String host) {
-    var hostParts = host.split('.');
-    var ruleParts = rule.labels.split('.');
-
-    hostParts.removeWhere((e) => e.isEmpty);
-
-    var matches = true;
-
-    if (ruleParts.length <= hostParts.length) {
-      int r = ruleParts.length - 1;
-      int h = hostParts.length - 1;
-
-      while (r >= 0) {
-        var rulePart = ruleParts[r];
-        var hostPart = hostParts[h];
-
-        if (rulePart != '*' && rulePart != hostPart) {
-          matches = false;
-          break;
-        }
-
-        r--;
-        h--;
-      }
-    } else {
-      matches = false;
-    }
-
-    return matches;
   }
 
   Rule _getPrevailingRule(List<Rule> matchingRules) {

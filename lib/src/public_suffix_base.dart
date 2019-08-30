@@ -160,6 +160,12 @@ class PublicSuffix {
     _parseUri(sourceUri, SuffixRules.ruleMap);
   }
 
+  /// Creates a new instance from a URI in a string.
+  ///
+  /// This is a convenience method that simply converts [uri] into a URI object
+  /// and creates an instance from it.
+  PublicSuffix.fromString(String uri) : this(Uri.parse(uri));
+
   void _parseUri(Uri uri, Map<String, Iterable<Rule>> suffixMap) {
     var host = _decodeHost(uri);
     var matchingRules = _findMatchingRules(host, suffixMap);

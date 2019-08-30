@@ -153,6 +153,7 @@ class SuffixRules {
   /// [hasInitialised] will return [false] after this has been called.
   static void dispose() {
     _rules = null;
+    _ruleMap = null;
   }
 }
 

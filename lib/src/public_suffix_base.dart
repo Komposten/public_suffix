@@ -12,7 +12,7 @@ import 'package:punycode/punycode.dart';
 
 import 'suffix_rules.dart';
 
-/// A description of the public suffix, root domain and registrable domain for a URI.
+/// A description of the public suffix, root domain and registrable domain for a URL.
 class PublicSuffix {
   final Uri sourceUri;
 
@@ -29,52 +29,52 @@ class PublicSuffix {
 
   PublicSuffix _punyDecoded;
 
-  /// Returns the registrable domain part of the URI, based on both ICANN/IANA and private rules.
+  /// Returns the registrable domain part of the URL, based on both ICANN/IANA and private rules.
   ///
   /// The registrable domain is the public suffix and one preceding label.
   /// For example, `images.google.co.uk` has the registrable domain `google.co.uk`.
   String get domain => _domain;
 
-  /// Returns the subdomain part of the URI, based on both ICANN/IANA and private rules.
+  /// Returns the subdomain part of the URL, based on both ICANN/IANA and private rules.
   ///
   /// The subdomain is the part of the host that precedes the registrable domain
   /// (see [domain]).
   /// For example, `images.google.co.uk` has the subdomain `images`.
   String get subdomain => _subdomain;
 
-  /// Returns the root domain part of the URI, based on both ICANN/IANA and private rules.
+  /// Returns the root domain part of the URL, based on both ICANN/IANA and private rules.
   ///
   /// The root domain is the label that precedes the public suffix.
   /// For example, `images.google.co.uk` has the root domain `google`.
   String get root => _root;
 
-  /// Returns the public suffix part of the URI, based on both ICANN/IANA and private rules.
+  /// Returns the public suffix part of the URL, based on both ICANN/IANA and private rules.
   ///
   /// The public suffix is the labels at the end of the URL which are not controlled
   /// by the registrant of the domain.
   /// For example, `images.google.co.uk` has the public suffix `co.uk`.
   String get suffix => _suffix;
 
-  /// Returns the registrable domain part of the URI, based on ICANN/IANA rules.
+  /// Returns the registrable domain part of the URL, based on ICANN/IANA rules.
   ///
   /// The registrable domain is the public suffix and one preceding label.
   /// For example, `images.google.co.uk` has the registrable domain `google.co.uk`.
   String get icannDomain => _icannDomain;
 
-  /// Returns the subdomain part of the URI, based on ICANN/IANA rules.
+  /// Returns the subdomain part of the URL, based on ICANN/IANA rules.
   ///
   /// The subdomain is the part of the host that precedes the registrable domain
   /// (see [domain]).
   /// For example, `images.google.co.uk` has the subdomain `images`.
   String get icannSubdomain => _icannSubdomain;
 
-  /// Returns the root domain part of the URI, based on ICANN/IANA rules.
+  /// Returns the root domain part of the URL, based on ICANN/IANA rules.
   ///
   /// The root domain is the label that precedes the public suffix.
   /// For example, `images.google.co.uk` has the root domain `google`.
   String get icannRoot => _icannRoot;
 
-  /// Returns the public suffix part of the URI, based on ICANN/IANA rules.
+  /// Returns the public suffix part of the URL, based on ICANN/IANA rules.
   ///
   /// The public suffix is the labels at the end of the URL which are not controlled
   /// by the registrant of the domain.
@@ -84,7 +84,7 @@ class PublicSuffix {
   /// Returns a punycode decoded version of this object.
   PublicSuffix get punyDecoded => _punyDecoded;
 
-  /// Checks if the URI was matched with a private rule rather than an ICANN/IANA rule.
+  /// Checks if the URL was matched with a private rule rather than an ICANN/IANA rule.
   ///
   /// If [true], then [root], [suffix] and [domain] will be different from the
   /// `icann`-prefixed getters.
@@ -154,20 +154,20 @@ class PublicSuffix {
     }
     if (!sourceUri.hasAuthority) {
       throw ArgumentError(
-          "The URI is missing the authority component: $sourceUri");
+          "The URL is missing the authority component: $sourceUri");
     }
 
-    _parseUri(sourceUri, SuffixRules.ruleMap);
+    _parseUrl(sourceUri, SuffixRules.ruleMap);
   }
 
-  /// Creates a new instance from a URI in a string.
+  /// Creates a new instance from a URL in a string.
   ///
-  /// This is a convenience method that simply converts [uri] into a URI object
+  /// This is a convenience method that simply converts [url] into a URI object
   /// and creates an instance from it.
-  PublicSuffix.fromString(String uri) : this(Uri.parse(uri));
+  PublicSuffix.fromString(String url) : this(Uri.parse(url));
 
-  void _parseUri(Uri uri, Map<String, Iterable<Rule>> suffixMap) {
-    var host = _decodeHost(uri);
+  void _parseUrl(Uri url, Map<String, Iterable<Rule>> suffixMap) {
+    var host = _decodeHost(url);
     var matchingRules = _findMatchingRules(host, suffixMap);
     var prevailingIcannRule = _getPrevailingRule(matchingRules['icann']);
     var prevailingAllRule = _getPrevailingRule(matchingRules['all']);
@@ -200,8 +200,8 @@ class PublicSuffix {
         icannPuny['root'], icannPuny['suffix']);
   }
 
-  String _decodeHost(Uri uri) {
-    var host = uri.host.replaceAll(RegExp(r'\.+$'), '').toLowerCase();
+  String _decodeHost(Uri url) {
+    var host = url.host.replaceAll(RegExp(r'\.+$'), '').toLowerCase();
     host = Uri.decodeComponent(host);
 
     var punycodes = RegExp(r'xn--[a-z0-9-]+').allMatches(host);

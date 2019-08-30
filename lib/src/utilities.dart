@@ -12,18 +12,18 @@ import 'package:public_suffix/public_suffix.dart';
 class DomainUtils {
   DomainUtils._();
 
-  /// Checks if a URI is a subdomain of another.
+  /// Checks if a URL is a subdomain of another.
   ///
-  /// Both URIs are parsed to [PublicSuffix] objects, which are then compared
+  /// Both URLs are parsed to [PublicSuffix] objects, which are then compared
   /// using [PublicSuffix.isSubdomainOf()].
   static bool isSubdomainOf(Uri potentialSub, Uri root, {bool icann = false}) {
-    var parsedUri = PublicSuffix(potentialSub);
+    var parsedUrl = PublicSuffix(potentialSub);
     var parsedRoot = PublicSuffix(root);
 
-    return parsedUri.isSubdomainOf(parsedRoot, icann: icann);
+    return parsedUrl.isSubdomainOf(parsedRoot, icann: icann);
   }
 
-  /// Checks if a URI is a subdomain or a root domain.
+  /// Checks if a URL is a subdomain or a root domain.
   ///
   /// [potentialSub] is parsed to a [PublicSuffix] object. It is a subdomain if
   /// the [subdomain] property of the object is [null].

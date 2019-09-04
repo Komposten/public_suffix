@@ -7,10 +7,16 @@ void main() {
   tearDown(() => SuffixRules.dispose());
 
   test('initPublicSuffixList_crossDomainUrl_initList', () async {
-    await SuffixRulesHelper.initFromUri(
-        Uri.parse('https://publicsuffix.org/list/public_suffix_list.dat'));
+    await SuffixRulesHelper.initFromUri(Uri.parse(
+        'https://raw.githubusercontent.com/Komposten/public_suffix/master/test/res/public_suffix_list.dat'));
     expect(SuffixRules.hasInitialised(), isTrue);
     expect(SuffixRules.rules, isNotEmpty);
+  });
+
+  test('initPublicSuffixList_resourceDoesNotExist_fail', () async {
+    var uri = Uri.parse(
+        "https://raw.githubusercontent.com/Komposten/public_suffix/master/test/res/i_dont_exist.dat");
+    expect(SuffixRulesHelper.initFromUri(uri), throwsException);
   });
 
   test('initPublicSuffixList_invalidUrl_throwException', () async {

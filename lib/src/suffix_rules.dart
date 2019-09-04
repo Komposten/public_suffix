@@ -14,14 +14,23 @@
 /// can be disposed of using [dispose] if it is no longer needed.
 class SuffixRules {
   static List<Rule> _rules;
+  static Map<String, Iterable<Rule>> _ruleMap;
 
   SuffixRules._();
 
-  /// Returns an unmodifiable list containing the current rules.
+  /// Returns an unmodifiable list containing the current rules in the original order.
   ///
   /// [null] is returned if the list has not been initialised.
   static List<Rule> get rules =>
       _rules != null ? List.unmodifiable(_rules) : null;
+
+  /// Returns an unmodifiable map containing the current rules.
+  ///
+  /// In each pair in the list the key is a label and the value a list of all
+  /// rules that end with that label.
+  /// [null] is returned if the map has not been initialised.
+  static Map<String, Iterable<Rule>> get ruleMap =>
+      _ruleMap != null ? Map.unmodifiable(_ruleMap) : null;
 
   /// Checks if the rule list has been initialised.
   static bool hasInitialised() => _rules != null;
@@ -43,6 +52,7 @@ class SuffixRules {
     var processed = process(rules);
     validate(processed);
     _rules = processed;
+    _ruleMap = _listToMap(_rules);
   }
 
   /// Converts a list of strings into a list of rules.
@@ -123,11 +133,27 @@ class SuffixRules {
       RegExp(r'^(?:\*|[^*.!\s][^*.!\s]*)(?:\.(?:[*]|[^*.\s]+))*$')
           .hasMatch(line);
 
+  static Map<String, Iterable<Rule>> _listToMap(List<Rule> rules) {
+    var map = <String, List<Rule>>{};
+    for (var rule in rules) {
+      var lastLabel = rule.labels.substring(rule.labels.lastIndexOf('.') + 1);
+      if (map.containsKey(lastLabel)) {
+        map[lastLabel].add(rule);
+      } else {
+        var list = <Rule>[rule];
+        map[lastLabel] = list;
+      }
+    }
+
+    return map;
+  }
+
   /// Disposes of the suffix list.
   ///
   /// [hasInitialised] will return [false] after this has been called.
   static void dispose() {
     _rules = null;
+    _ruleMap = null;
   }
 }
 
@@ -144,9 +170,30 @@ class Rule {
   /// If the rule is an ICANN/IANA rule.
   final bool isIcann;
 
+  List<int> _wildcards;
+
   Rule(String rule, {this.isIcann = true})
       : isException = rule.startsWith('!'),
-        labels = rule.startsWith('!') ? rule.substring(1) : rule;
+        labels = rule.startsWith('!') ? rule.substring(1) : rule {
+    _wildcards = '*'.allMatches(labels).map((m) => m.start).toList();
+  }
+
+  bool matches(String host) {
+    var hostParts = host.split('.')..removeWhere((e) => e.isEmpty);
+    var ruleParts = labels.split('.');
+
+    if (ruleParts.length <= hostParts.length) {
+      hostParts = hostParts.sublist(hostParts.length - ruleParts.length);
+
+      if (_wildcards.isNotEmpty) {
+        for (var index in _wildcards) {
+          hostParts[index] = '*';
+        }
+      }
+    }
+
+    return labels == hostParts.join('.');
+  }
 
   @override
   String toString() {
@@ -185,4 +232,28 @@ class Rule {
       return true;
     }
   }
+
+  int _compareTo(Rule other) {
+    var itr = RuneIterator.at(labels, labels.length);
+    var itr2 = RuneIterator.at(other.labels, other.labels.length);
+    var diff = 0;
+
+    while (itr.movePrevious() && itr2.movePrevious()) {
+      diff = itr.current - itr2.current;
+
+      if (diff != 0) {
+        return diff;
+      }
+    }
+
+    return 0;
+  }
+
+  bool operator <=(Rule other) => _compareTo(other) <= 0;
+
+  bool operator <(Rule other) => _compareTo(other) < 0;
+
+  bool operator >=(Rule other) => _compareTo(other) >= 0;
+
+  bool operator >(Rule other) => _compareTo(other) > 0;
 }

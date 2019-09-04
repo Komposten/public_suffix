@@ -7,11 +7,14 @@ void main() {
   test('PublicSuffix_PublicSuffixListNotInitialised_throwStateError', () {
     expect(
         () => PublicSuffix(Uri.parse('http://www.pub.dev')), throwsStateError);
+    expect(
+        () => PublicSuffix.fromString('http://www.pub.dev'), throwsStateError);
   });
 
   test('PublicSuffix_uriWithoutAuthority_throwArgumentError', () async {
     SuffixRules.initFromString("");
     expect(() => PublicSuffix(Uri.parse('www.pub.dev')), throwsArgumentError);
+    expect(() => PublicSuffix.fromString('www.pub.dev'), throwsArgumentError);
   });
 
   group('PublicSuffix_', () {
@@ -43,12 +46,19 @@ void main() {
       expect(suffix.domain, equals("${suffix.root}.${suffix.suffix}"));
     });
 
-    test('urlWithoutRegistrableDomain_registrableDomainIsNull', () {
+    test('urlWithoutRegistrableDomain_registrableDomainAndSubdomainAreNull',
+        () {
       var suffix = PublicSuffix(Uri.parse('http://dev'));
 
       expect(suffix.root, isEmpty);
       expect(suffix.suffix, equals('dev'));
       expect(suffix.domain, isNull);
+      expect(suffix.subdomain, isNull);
+    });
+
+    test('urlWithoutSubdomain_subdomainIsNull', () {
+      var suffix = PublicSuffix(Uri.parse('http://pub.dev'));
+      expect(suffix.subdomain, isNull);
     });
 
     test('basicUrls_correctlyIdentifyRootAndTld', () {
@@ -163,23 +173,30 @@ void main() {
     });
 
     test('githubIoUrl_differentOverallAndIcannData', () {
-      var suffix = PublicSuffix(Uri.parse('http://komposten.github.io'));
+      var suffix = PublicSuffix(Uri.parse('http://sub.komposten.github.io'));
       expect(suffix.root, equals('komposten'));
       expect(suffix.suffix, equals('github.io'));
+      expect(suffix.subdomain, equals('sub'));
       expect(suffix.icannRoot, equals('github'));
       expect(suffix.icannSuffix, equals('io'));
+      expect(suffix.icannSubdomain, equals('sub.komposten'));
       expect(suffix.punyDecoded.root, equals('komposten'));
       expect(suffix.punyDecoded.suffix, equals('github.io'));
+      expect(suffix.punyDecoded.subdomain, equals('sub'));
       expect(suffix.punyDecoded.icannRoot, equals('github'));
       expect(suffix.punyDecoded.icannSuffix, equals('io'));
+      expect(suffix.punyDecoded.icannSubdomain, equals('sub.komposten'));
     });
 
     test('punycodedUrl_punydecodedInstanceHasDecodedData', () {
-      var suffix = PublicSuffix(Uri.parse('http://xn--85x722f.xn--55qx5d.cn'));
-      expect(suffix.root, equals('xn--85x722f'));
+      var suffix = PublicSuffix(
+          Uri.parse('http://xn--6qq79v.xn--85x722f.xn--55qx5d.cn'));
       expect(suffix.suffix, equals('xn--55qx5d.cn'));
-      expect(suffix.punyDecoded.root, equals('食狮'));
+      expect(suffix.root, equals('xn--85x722f'));
+      expect(suffix.subdomain, equals('xn--6qq79v'));
       expect(suffix.punyDecoded.suffix, equals('公司.cn'));
+      expect(suffix.punyDecoded.root, equals('食狮'));
+      expect(suffix.punyDecoded.subdomain, equals('你好'));
     });
 
     test('notPunycodedUrl_punydecodedInstanceHasSameData', () {
@@ -191,6 +208,22 @@ void main() {
     });
 
     tearDownAll(() => SuffixRules.dispose());
+  });
+
+  group('PublicSuffixFromString_', () {
+    setUpAll(() async {
+      await SuffixRulesHelper.initFromUri(getSuffixListFileUri());
+    });
+
+    test('normalUrls_parseCorrectly', () {
+      var suffix = PublicSuffix.fromString('http://www.pub.dev');
+      expect(suffix.suffix, equals('dev'));
+      expect(suffix.root, equals('pub'));
+
+      suffix = PublicSuffix.fromString('http://www.komposten.github.io');
+      expect(suffix.suffix, equals('github.io'));
+      expect(suffix.root, equals('komposten'));
+    });
   });
 
   group('isPrivateSuffix_', () {
@@ -206,6 +239,144 @@ void main() {
     test('hasNotMatchedPrivateRule_false', () {
       var suffix = PublicSuffix(Uri.parse('http://google.co.uk'));
       expect(suffix.isPrivateSuffix(), isFalse);
+    });
+
+    tearDownAll(() => SuffixRules.dispose());
+  });
+
+  group('isSubdomainOf_', () {
+    setUpAll(() async {
+      await SuffixRulesHelper.initFromUri(getSuffixListFileUri());
+    });
+
+    test('subdomainOfRoot_true', () {
+      expect(
+          PublicSuffix(Uri.parse('http://images.google.co.uk'))
+              .isSubdomainOf(PublicSuffix(Uri.parse('http://google.co.uk'))),
+          isTrue);
+    });
+
+    test('subdomainOfSubdomain_true', () {
+      expect(
+          PublicSuffix(Uri.parse('http://deeper.images.google.co.uk'))
+              .isSubdomainOf(
+                  PublicSuffix(Uri.parse('http://images.google.co.uk'))),
+          isTrue);
+    });
+
+    test('differentSubdomains_false', () {
+      expect(
+          PublicSuffix(Uri.parse('http://images.google.co.uk')).isSubdomainOf(
+              PublicSuffix(Uri.parse('http://photos.google.co.uk'))),
+          isFalse);
+      expect(
+          PublicSuffix(Uri.parse('http://deeper.images.google.co.uk'))
+              .isSubdomainOf(PublicSuffix(
+                  Uri.parse('http://deeper.images.photos.google.co.uk'))),
+          isFalse);
+    });
+
+    test('noSubdomain_false', () {
+      expect(
+          PublicSuffix(Uri.parse('http://google.co.uk'))
+              .isSubdomainOf(PublicSuffix(Uri.parse('http://google.co.uk'))),
+          isFalse);
+    });
+
+    test('differentDomains_false', () {
+      expect(
+          PublicSuffix(Uri.parse('http://images.google.co.uk'))
+              .isSubdomainOf(PublicSuffix(Uri.parse('http://google.com'))),
+          isFalse);
+      expect(
+          PublicSuffix(Uri.parse('http://images.google.co.uk'))
+              .isSubdomainOf(PublicSuffix(Uri.parse('http://googol.co.uk'))),
+          isFalse);
+    });
+
+    test('icann', () {
+      expect(
+          PublicSuffix(Uri.parse('http://komposten.github.io')).isSubdomainOf(
+              PublicSuffix(Uri.parse('http://github.io')),
+              icann: false),
+          isFalse);
+      expect(
+          PublicSuffix(Uri.parse('http://komposten.github.io')).isSubdomainOf(
+              PublicSuffix(Uri.parse('http://github.io')),
+              icann: true),
+          isTrue);
+    });
+
+    tearDownAll(() => SuffixRules.dispose());
+  });
+
+  group('hasKnownSuffix_', () {
+    setUpAll(() async {
+      await SuffixRulesHelper.initFromUri(getSuffixListFileUri());
+    });
+
+    test('knownSuffixes_true', () {
+      // Exact matches
+      expect(PublicSuffix(Uri.parse('http://google.co.uk')).hasKnownSuffix(),
+          isTrue);
+      expect(
+          PublicSuffix(Uri.parse('http://komposten.github.io'))
+              .hasKnownSuffix(),
+          isTrue);
+      // Wildcard matches
+      expect(
+          PublicSuffix(Uri.parse('http://mouse.cat.moonscale.io'))
+              .hasKnownSuffix(),
+          isTrue);
+    });
+
+    test('unknownSuffixes_false', () {
+      expect(PublicSuffix(Uri.parse('http://example.example')).hasKnownSuffix(),
+          isFalse);
+      expect(
+          PublicSuffix(Uri.parse('http://komposten.hamster')).hasKnownSuffix(),
+          isFalse);
+    });
+
+    tearDownAll(() => SuffixRules.dispose());
+  });
+
+  group('hasValidDomain_', () {
+    setUpAll(() async {
+      await SuffixRulesHelper.initFromUri(getSuffixListFileUri());
+    });
+
+    test('validDomains_true', () {
+      expect(PublicSuffix(Uri.parse('http://google.co.uk')).hasValidDomain(),
+          isTrue);
+      expect(
+          PublicSuffix(Uri.parse('http://komposten.github.io'))
+              .hasValidDomain(),
+          isTrue);
+    });
+
+    test('invalidDomains_false', () {
+      expect(PublicSuffix(Uri.parse('http://co.uk')).hasValidDomain(), isFalse);
+      expect(PublicSuffix(Uri.parse('http://github.io')).hasValidDomain(),
+          isFalse);
+    });
+
+    test('icann', () {
+      expect(PublicSuffix(Uri.parse('http://github.io')).hasValidDomain(),
+          isFalse);
+      expect(
+          PublicSuffix(Uri.parse('http://github.io'))
+              .hasValidDomain(icann: true),
+          isTrue);
+    });
+
+    test('dontAcceptDefaultRule', () {
+      expect(PublicSuffix(Uri.parse('http://example.example')).hasValidDomain(),
+          isTrue);
+      expect(
+          PublicSuffix(Uri.parse('http://example.example'))
+              .hasValidDomain(acceptDefaultRule: false),
+          isFalse);
     });
 
     tearDownAll(() => SuffixRules.dispose());

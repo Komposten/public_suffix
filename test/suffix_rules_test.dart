@@ -177,6 +177,36 @@ void main() {
     });
   });
 
+  group('ruleMap_', () {
+    tearDown(() => SuffixRules.dispose());
+
+    test('afterInitialising_returnMap', () {
+      SuffixRules.initFromList(['br', 'br.nom']);
+      expect(SuffixRules.ruleMap, isNotNull);
+      expect(SuffixRules.ruleMap, hasLength(2));
+      expect(SuffixRules.ruleMap, containsPair('br', [Rule('br')]));
+    });
+
+    test('beforeInitialising_returnNull', () {
+      expect(SuffixRules.ruleMap, isNull);
+    });
+
+    test('multipleRulesFromSameTld_combineIntoSameList', () {
+      SuffixRules.initFromList(['br', 'nom.br', 'nom.mer.br']);
+      expect(SuffixRules.ruleMap, isNotNull);
+      expect(SuffixRules.ruleMap, hasLength(1));
+      expect(SuffixRules.ruleMap,
+          containsPair('br', [Rule('br'), Rule('nom.br'), Rule('nom.mer.br')]));
+    });
+
+    test('modifyMap_exception', () {
+      SuffixRules.initFromList(['br', 'nom.br']);
+      expect(() => SuffixRules.ruleMap['rb'] = [Rule('rb')],
+          throwsUnsupportedError);
+      expect(() => SuffixRules.ruleMap.remove('br'), throwsUnsupportedError);
+    });
+  });
+
   group('initFromList_', () {
     test('listWithComments_commentsRemoved', () {
       var lines = <String>['br', '//comment', 'nom.br'];

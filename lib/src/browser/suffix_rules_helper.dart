@@ -22,6 +22,8 @@ class SuffixRulesHelper {
 
   /// Initialises [SuffixRules] using a suffix list resource obtained from a URI.
   ///
+  /// See [SuffixRules.initFromString] for the expected format of the suffix list.
+  ///
   /// [HttpRequest.request] is used to retrieve the resource, and the optional
   /// parameters can be used to tweak this request. If more fine-grained control
   /// over the request is needed, consider obtaining the suffix list using custom

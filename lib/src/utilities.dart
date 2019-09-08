@@ -40,7 +40,13 @@ class DomainUtils {
   /// Checks if [suffix] is a known url suffix.
   ///
   /// For example, `co.uk` is known but `example` is not.
+  ///
+  /// Throws a [StateError] if [SuffixRules] has not been initialised.
   static bool isKnownSuffix(String suffix) {
+    if (!SuffixRules.hasInitialised()) {
+      throw StateError('PublicSuffixList has not been initialised!');
+    }
+
     var split = suffix.split('.');
     var rules = SuffixRules.ruleMap[split.last] ?? <String>[];
     var isKnown = false;

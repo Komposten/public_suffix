@@ -15,24 +15,19 @@ public_suffix is a dart library for identifying the public suffixes (or TLDs), r
 - Check if URLs are subdomains, have valid domain parts, or end with known suffixes.
 
 ## Usage
-1) Import public_suffix:
-    - `public_suffix.dart`: If you prefer loading suffix lists on your own.
-    - `public_suffix_io.dart`: For helper methods to load suffix lists from URIs using `dart:io`.
-    - `public_suffix_browser.dart`:  For helper methods to load suffix lists from URIs using `dart:html`.
-2) Initialise `SuffixRules` from a string or uri containing suffix rules.
-3) Create a new instance of `PublicSuffix` to parse a URL.
-4) Access the different components through the `PublicSuffix` object.
-
-**Note:** Don't overload publicsuffix.org's servers by repeatedly retrieving the suffix list from them. Cache a copy somewhere instead, and update that copy only when the master copy is updated.
+1) Import `public_suffix.dart`.
+2) [Initialise `SuffixRules`](#initialising-suffixrules) from a suffix rule list.
+3) Create instances of `PublicSuffix` to parse URLs.
+4) Access the different URL components through the `PublicSuffix` objects.
 
 ### Short example
 ```dart
-import 'package:public_suffix/public_suffix_io.dart';
+import 'package:public_suffix/public_suffix.dart';
 
-main(List<String> arguments) async {
+main() {
   // Load a list of suffix rules from publicsuffix.org.
-  await SuffixRulesHelper.initFromUri(
-      Uri.parse('https://publicsuffix.org/list/public_suffix_list.dat'));
+  String suffixListString = 'load the list into this string';
+  SuffixRules.initFromString(suffixListString);
 	  
   // Parse a URL.
   PublicSuffix parsedUrl =
@@ -44,12 +39,39 @@ main(List<String> arguments) async {
   print(parsedUrl.domain);      // komposten.github.io
   print(parsedUrl.icannDomain); // github.io
 
-  // public_suffix also supports punycoded URLs.
+  // public_suffix also supports punycoded URLs:
   parsedUrl = PublicSuffix.fromString('https://www.xn--6qq79v.cn');
   print(parsedUrl.domain);             // xn--6qq79v.cn
   print(parsedUrl.punyDecoded.domain); // 你好.cn
 }
 ```
+
+### Initialising SuffixRules
+public_suffix requires a list of suffix rules to work. There is no list bundled by default as these lists are updated frequently.
+Instead you'll have to load a list on your own and pass that list to `SuffixRules`. There are two ways of doing this:
+1) Load the list using your own code and pass it to `SuffixRules.initFromString()`:
+   ```dart
+   //Example using Flutter
+   import 'package:flutter/services.dart';
+   import 'package:public_suffix/public_suffix.dart';
+   
+   main() {
+       var suffixList = rootBundle.loadString('assets/public_suffix_list.dat');
+       SuffixRules.initFromString(suffixList);
+   }
+   ```
+2) Import either the `dart:io` or the `dart:html`-based helper and load the list from a URI:
+   ```dart
+   //Example using dart:io; for dart:html use public_suffix_browser.dart instead.
+   import 'package:public_suffix/public_suffix_io.dart';
+   
+   main() async {
+     Uri uri = Uri.parse('https://publicsuffix.org/list/public_suffix_list.dat');
+     await SuffixRulesHelper.initFromUri(listUri);
+   }
+   ```
+
+**Note:** Don't overload publicsuffix.org's servers by repeatedly retrieving the suffix list from them. Cache a copy somewhere instead, and update that copy only when the master copy is updated.
 
 ## Utility functions
 Several utility functions can be found in the `DomainUtils` class (imported from `public_suffix.dart`). These currently include:

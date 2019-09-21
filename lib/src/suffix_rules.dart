@@ -37,8 +37,10 @@ class SuffixRules {
 
   /// Initialises the rule list.
   ///
-  /// [rules] is expected to contain the contents of a suffix list with one rule per line,
-  /// like the file at [publicsuffix.org](https://publicsuffix.org/list/public_suffix_list.dat).
+  /// [rules] is expected to contain the contents of a suffix list with one rule per line.
+  /// The list is expected to follow the same format as the list at [publicsuffix.org](https://publicsuffix.org/list/public_suffix_list.dat).
+  /// This includes the `BEGIN PRIVATE` tag/comment, which [process] uses to separate
+  /// ICANN/IANA rules from private rules.
   static void initFromString(String rules) {
     initFromList(rules.split(RegExp(r'[\r\n]+')));
   }

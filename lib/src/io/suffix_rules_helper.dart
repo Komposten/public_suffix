@@ -23,6 +23,8 @@ class SuffixRulesHelper {
 
   /// Initialises [SuffixRules] using a suffix list resource obtained from a URI.
   ///
+  /// See [SuffixRules.initFromString] for the expected format of the suffix list.
+  ///
   /// If [uri] is a `file:///` URI, the file is loaded using
   /// [File.readAsString]. For other schemes, the resource is fetched using
   /// an http request created using a simple [HttpClient].

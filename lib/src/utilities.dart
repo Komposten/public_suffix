@@ -9,6 +9,12 @@
  */
 import 'package:public_suffix/public_suffix.dart';
 
+/// Various utility functions for domains and suffixes.
+///
+/// This class holds utility functions to perform certain checks on domains and
+/// suffixes without having to first create [PublicSuffix] objects. Most of these
+/// functions create [PublicSuffix] objects internally, so if you already have
+/// such objects consider using the equivalent methods within [PublicSuffix] instead.
 class DomainUtils {
   DomainUtils._();
 
@@ -16,6 +22,8 @@ class DomainUtils {
   ///
   /// Both URLs are parsed to [PublicSuffix] objects, which are then compared
   /// using [PublicSuffix.isSubdomainOf()].
+  ///
+  /// Throws a [StateError] if [SuffixRules] has not been initialised.
   static bool isSubdomainOf(Uri potentialSub, Uri root, {bool icann = false}) {
     var parsedUrl = PublicSuffix(potentialSub);
     var parsedRoot = PublicSuffix(root);
@@ -29,6 +37,8 @@ class DomainUtils {
   /// the [subdomain] property of the object is [null].
   ///
   /// If [icann] is [true], [icannSubdomain] is checked instead.
+  ///
+  /// Throws a [StateError] if [SuffixRules] has not been initialised.
   static bool isSubdomain(Uri potentialSub, {bool icann = false}) {
     if (icann) {
       return PublicSuffix(potentialSub).icannSubdomain != null;
@@ -40,7 +50,13 @@ class DomainUtils {
   /// Checks if [suffix] is a known url suffix.
   ///
   /// For example, `co.uk` is known but `example` is not.
+  ///
+  /// Throws a [StateError] if [SuffixRules] has not been initialised.
   static bool isKnownSuffix(String suffix) {
+    if (!SuffixRules.hasInitialised()) {
+      throw StateError('PublicSuffixList has not been initialised!');
+    }
+
     var split = suffix.split('.');
     var rules = SuffixRules.ruleMap[split.last] ?? <String>[];
     var isKnown = false;
@@ -61,6 +77,8 @@ class DomainUtils {
   /// If [icann] is [true] the check will be based on only the ICANN/IANA rules.
   /// If [acceptDefaultRule] is [false] URLs with suffixes only matching the
   /// default rule (`*`) will be seen as invalid.
+  ///
+  /// Throws a [StateError] if [SuffixRules] has not been initialised.
   static bool hasValidDomain(Uri domain,
       {bool icann = false, bool acceptDefaultRule = true}) {
     return PublicSuffix(domain)

@@ -3,6 +3,7 @@
 - Improved documentation of `DomainUtils`.
 - Fixed `DomainUtils.isKnownSuffix` not throwing if `SuffixRules` hasn't been initialised.
 - Removed the `test_coverage` dev dependency (doesn't work for browser tests).
+- Updated README.md to better explain how to initialise `SuffixRules`.
 
 ## 1.2.0
 - Added a hash map-based `ruleMap` to `SuffixRules` to speed up the performance when matching rules.

@@ -1,5 +1,6 @@
 @TestOn("vm")
 import 'package:test/test.dart';
+import 'package:public_suffix/public_suffix.dart';
 import 'package:public_suffix/public_suffix_io.dart';
 import 'io_test_utils.dart';
 

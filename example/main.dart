@@ -1,3 +1,4 @@
+import 'package:public_suffix/public_suffix.dart';
 import 'package:public_suffix/public_suffix_io.dart';
 
 Future<void> main() async {

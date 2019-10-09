@@ -14,7 +14,7 @@ import 'suffix_rules.dart';
 
 /// A description of the public suffix, root domain and registrable domain for a URL.
 class PublicSuffix {
-  final Uri sourceUri;
+  final Uri sourceUrl;
 
   bool _sourcePunycoded = false;
   bool _hasKnownSuffix;
@@ -134,7 +134,7 @@ class PublicSuffix {
     }
   }
 
-  PublicSuffix._(this.sourceUri, String host, this._root, this._suffix,
+  PublicSuffix._(this.sourceUrl, String host, this._root, this._suffix,
       this._icannRoot, this._icannSuffix) {
     _domain = _buildRegistrableDomain(_root, _suffix);
     _icannDomain = _buildRegistrableDomain(_icannRoot, _icannSuffix);
@@ -142,22 +142,22 @@ class PublicSuffix {
     _icannSubdomain = _getSubdomain(host, _icannDomain);
   }
 
-  /// Creates a new instance based on the specified [sourceUri].
+  /// Creates a new instance based on the specified [sourceUrl].
   ///
   /// Throws a [StateError] if [SuffixRules] has not been initialised.
   ///
-  /// Throws an [ArgumentError] if [sourceUri] is missing the authority component
+  /// Throws an [ArgumentError] if [sourceUrl] is missing the authority component
   /// (e.g. if no protocol is specified).
-  PublicSuffix(this.sourceUri) {
+  PublicSuffix(this.sourceUrl) {
     if (!SuffixRules.hasInitialised()) {
       throw StateError('PublicSuffixList has not been initialised!');
     }
-    if (!sourceUri.hasAuthority) {
+    if (!sourceUrl.hasAuthority) {
       throw ArgumentError(
-          "The URL is missing the authority component: $sourceUri");
+          "The URL is missing the authority component: $sourceUrl");
     }
 
-    _parseUrl(sourceUri, SuffixRules.ruleMap);
+    _parseUrl(sourceUrl, SuffixRules.ruleMap);
   }
 
   /// Creates a new instance from a URL in a string.
@@ -196,7 +196,7 @@ class PublicSuffix {
     var puny = allData['puny'];
     var icannPuny = icannData['puny'];
 
-    _punyDecoded = PublicSuffix._(sourceUri, host, puny['root'], puny['suffix'],
+    _punyDecoded = PublicSuffix._(sourceUrl, host, puny['root'], puny['suffix'],
         icannPuny['root'], icannPuny['suffix']);
   }
 

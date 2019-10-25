@@ -1,6 +1,6 @@
 @TestOn("browser")
 import 'package:public_suffix/public_suffix.dart';
-import 'package:public_suffix/public_suffix_browser.dart';
+import 'package:public_suffix/browser_helper.dart';
 import 'package:test/test.dart';
 
 void main() {

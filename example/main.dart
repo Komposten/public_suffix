@@ -1,5 +1,5 @@
 import 'package:public_suffix/public_suffix.dart';
-import 'package:public_suffix/public_suffix_io.dart';
+import 'package:public_suffix/io_helper.dart';
 
 Future<void> main() async {
   // Load a list of suffix rules from publicsuffix.org.

@@ -172,29 +172,30 @@ class Rule {
   /// If the rule is an ICANN/IANA rule.
   final bool isIcann;
 
-  List<int> _wildcards;
+  List<String> _parts;
 
   Rule(String rule, {this.isIcann = true})
       : isException = rule.startsWith('!'),
         labels = rule.startsWith('!') ? rule.substring(1) : rule {
-    _wildcards = '*'.allMatches(labels).map((m) => m.start).toList();
+    _parts = labels.split('.');
   }
 
   bool matches(String host) {
     var hostParts = host.split('.')..removeWhere((e) => e.isEmpty);
-    var ruleParts = labels.split('.');
 
-    if (ruleParts.length <= hostParts.length) {
-      hostParts = hostParts.sublist(hostParts.length - ruleParts.length);
+    if (_parts.length <= hostParts.length) {
+      hostParts = hostParts.sublist(hostParts.length - _parts.length);
 
-      if (_wildcards.isNotEmpty) {
-        for (var index in _wildcards) {
-          hostParts[index] = '*';
+      for (int i = 0; i < hostParts.length; i++) {
+        if (_parts[i] != '*' && _parts[i] != hostParts[i]) {
+          return false;
         }
       }
-    }
 
-    return labels == hostParts.join('.');
+      return true;
+    } else {
+      return false;
+    }
   }
 
   @override

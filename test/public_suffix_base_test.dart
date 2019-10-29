@@ -1,7 +1,8 @@
 @TestOn('vm')
-import 'package:public_suffix/public_suffix.dart';
 import 'package:public_suffix/io_helper.dart';
+import 'package:public_suffix/public_suffix.dart';
 import 'package:test/test.dart';
+
 import 'io_test_utils.dart';
 
 void main() {
@@ -305,6 +306,12 @@ void main() {
           PublicSuffix(Uri.parse('http://komposten.github.io')).isSubdomainOf(
               PublicSuffix(Uri.parse('http://github.io')),
               icann: true),
+          isTrue);
+      expect(
+          PublicSuffix(Uri.parse('http://www.komposten.github.io'))
+              .isSubdomainOf(
+                  PublicSuffix(Uri.parse('http://komposten.github.io')),
+                  icann: true),
           isTrue);
     });
 

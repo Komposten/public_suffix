@@ -1,3 +1,12 @@
+## 2.0.0
+### API changes
+- Remove export of `public_suffix.dart` from the helper files.
+- Rename `public_suffix_io.dart` and `public_suffix_browser.dart` to `io_helper.dart` and `browser_helper.dart`.
+- Rename `PublicSuffix.sourceUri` to `PublicSuffix.sourceUrl`.
+
+### Fixes
+- Fix rule matching not working for rules with wildcards not in the first position (e.g. `a.*.c`).
+
 ## 1.2.1
 - Improved the suffix list format documentation in `SuffixRules` and the `SuffixRulesHelper`s.
 - Improved documentation of `DomainUtils`.

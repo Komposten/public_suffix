@@ -8,13 +8,14 @@
  * of this project.
  */
 
+import 'package:public_suffix/public_suffix.dart';
 import 'package:punycode/punycode.dart';
 
 import 'suffix_rules.dart';
 
 /// A description of the public suffix, root domain and registrable domain for a URL.
 class PublicSuffix {
-  final Uri sourceUri;
+  Uri _sourceUrl;
 
   bool _sourcePunycoded = false;
   bool _hasKnownSuffix;
@@ -28,6 +29,8 @@ class PublicSuffix {
   String _icannSubdomain;
 
   PublicSuffix _punyDecoded;
+
+  Uri get sourceUrl => _sourceUrl;
 
   /// Returns the registrable domain part of the URL, based on both ICANN/IANA and private rules.
   ///
@@ -134,7 +137,78 @@ class PublicSuffix {
     }
   }
 
-  PublicSuffix._(this.sourceUri, String host, this._root, this._suffix,
+  /// An alternative to the default constructor with adjustable
+  /// leniency for invalid URLs.
+  ///
+  /// [leniency] specifies how an invalid URL should be handled. An
+  /// invalid URL is a URL that is null, empty, missing the authority
+  /// component or not formatted as a URI format. The default is
+  /// [Leniency.allowEmptyUrl].
+  ///
+  /// - [Leniency.strict]: All invalid URLs will throw either an
+  /// [ArgumentError] (if the URL is null, empty or missing the
+  /// authority component) or a [FormatException] (if the URI has
+  /// an invalid format). This is the same as using the default
+  /// constructor.
+  /// - [Leniency.allowEmptyUrl]: `null` is returned if the URL is null
+  /// or empty. Other invalid URLs will still throw.
+  /// - [Leniency.allowAll]: `null` is returned if the URL is in any
+  /// way invalid.
+  ///
+  /// [suffixRules] can be used to specify the rules to be used when
+  /// parsing the URL. If not specified, [DefaultSuffixRules.rules] will
+  /// be used.
+  factory PublicSuffix.fromString(String url,
+      {SuffixRules suffixRules, Leniency leniency = Leniency.allowEmptyUrl}) {
+    try {
+      return PublicSuffix(urlString: url, suffixRules: suffixRules);
+    } catch (e) {
+      if (leniency == Leniency.allowAll ||
+          (leniency == Leniency.allowEmptyUrl &&
+              (url == null || url.isEmpty))) {
+        return null;
+      }
+
+      rethrow;
+    }
+  }
+
+  /// An alternative to the default constructor with adjustable
+  /// leniency for invalid URLs.
+  ///
+  /// [leniency] specifies how an invalid URL should be handled. An
+  /// invalid URL is a URL that is null, empty, missing the authority
+  /// component or not formatted as a URI format.
+  ///
+  /// - [Leniency.strict]: All invalid URLs will throw either an
+  /// [ArgumentError] (if the URL is null, empty or missing the
+  /// authority component) or a [FormatException] (if the URI has
+  /// an invalid format). This is the same as using the default
+  /// constructor.
+  /// - [Leniency.allowEmptyUrl]: `null` is returned if the URL is null
+  /// or empty. Other invalid URLs will still throw.
+  /// - [Leniency.allowAll]: `null` is returned if the URL is in any
+  /// way invalid.
+  ///
+  /// [suffixRules] can be used to specify the rules to be used when
+  /// parsing the URL. If not specified, [DefaultSuffixRules.rules] will
+  /// be used.
+  factory PublicSuffix.fromUrl(Uri url,
+      {SuffixRules suffixRules, Leniency leniency = Leniency.allowEmptyUrl}) {
+    try {
+      return PublicSuffix(url: url, suffixRules: suffixRules);
+    } catch (e) {
+      if (leniency == Leniency.allowAll ||
+          (leniency == Leniency.allowEmptyUrl &&
+              (url == null || url.toString().isEmpty))) {
+        return null;
+      }
+
+      rethrow;
+    }
+  }
+
+  PublicSuffix._(this._sourceUrl, String host, this._root, this._suffix,
       this._icannRoot, this._icannSuffix) {
     _domain = _buildRegistrableDomain(_root, _suffix);
     _icannDomain = _buildRegistrableDomain(_icannRoot, _icannSuffix);
@@ -142,29 +216,33 @@ class PublicSuffix {
     _icannSubdomain = _getSubdomain(host, _icannDomain);
   }
 
-  /// Creates a new instance based on the specified [sourceUri].
+  /// Creates a new instance from a URL.
   ///
-  /// Throws a [StateError] if [SuffixRules] has not been initialised.
+  /// Either [url] or [urlString] must be specified.
   ///
-  /// Throws an [ArgumentError] if [sourceUri] is missing the authority component
+  /// [suffixRules] can be used to specify the rules to be used when
+  /// parsing the URL. If not specified, [DefaultSuffixRules.rules] will
+  /// be used.
+  ///
+  /// Throws a [StateError] if [suffixRules] is null and [DefaultSuffixRules]
+  /// has not been initialised.
+  ///
+  /// Throws an [ArgumentError] if [sourceUrl] is missing the authority component
   /// (e.g. if no protocol is specified).
-  PublicSuffix(this.sourceUri) {
-    if (!SuffixRules.hasInitialised()) {
-      throw StateError('PublicSuffixList has not been initialised!');
+  PublicSuffix({Uri url, String urlString, SuffixRules suffixRules}) {
+    if (url == null && urlString == null) {
+      throw ArgumentError('Either url or urlString must be specified!');
     }
-    if (!sourceUri.hasAuthority) {
+
+    _sourceUrl = url ?? Uri.parse(urlString);
+    if (!sourceUrl.hasAuthority) {
       throw ArgumentError(
-          "The URL is missing the authority component: $sourceUri");
+          'The URL is missing the authority component: $sourceUrl');
     }
 
-    _parseUrl(sourceUri, SuffixRules.ruleMap);
+    suffixRules ??= DefaultSuffixRules.rulesOrThrow();
+    _parseUrl(sourceUrl, suffixRules.ruleMap);
   }
-
-  /// Creates a new instance from a URL in a string.
-  ///
-  /// This is a convenience method that simply converts [url] into a URI object
-  /// and creates an instance from it.
-  PublicSuffix.fromString(String url) : this(Uri.parse(url));
 
   void _parseUrl(Uri url, Map<String, Iterable<Rule>> suffixMap) {
     var host = _decodeHost(url);
@@ -191,12 +269,12 @@ class PublicSuffix {
     _icannRoot = icannData['root'];
     _icannDomain = icannData['registrable'];
     _icannSubdomain = icannData['sub'];
-    _hasKnownSuffix = (prevailingAllRule.labels != "*");
+    _hasKnownSuffix = (prevailingAllRule.labels != '*');
 
     var puny = allData['puny'];
     var icannPuny = icannData['puny'];
 
-    _punyDecoded = PublicSuffix._(sourceUri, host, puny['root'], puny['suffix'],
+    _punyDecoded = PublicSuffix._(sourceUrl, host, puny['root'], puny['suffix'],
         icannPuny['root'], icannPuny['suffix']);
   }
 
@@ -208,7 +286,7 @@ class PublicSuffix {
 
     if (punycodes.isNotEmpty) {
       _sourcePunycoded = true;
-      int offset = 0;
+      var offset = 0;
       punycodes.forEach((match) {
         var decoded = punycodeDecode(match.group(0).substring(4));
         host = host.replaceRange(
@@ -245,9 +323,9 @@ class PublicSuffix {
 
   Rule _getPrevailingRule(List<Rule> matchingRules) {
     Rule prevailing;
-    int longestLength = 0;
+    var longestLength = 0;
 
-    for (Rule rule in matchingRules) {
+    for (var rule in matchingRules) {
       if (rule.isException) {
         prevailing = rule;
         break;
@@ -297,7 +375,7 @@ class PublicSuffix {
     var ruleLength = '.'.allMatches(prevailingRule.labels).length + 1;
 
     var index = host.length;
-    for (int i = 0; i < ruleLength; i++) {
+    for (var i = 0; i < ruleLength; i++) {
       index = host.lastIndexOf('.', index - 1);
     }
 
@@ -326,8 +404,8 @@ class PublicSuffix {
     return input.split('.').map((part) {
       var puny = punycodeEncode(part);
 
-      if (puny != "$part-" && puny != part) {
-        return "xn--$puny";
+      if (puny != '$part-' && puny != part) {
+        return 'xn--$puny';
       } else {
         return part;
       }
@@ -335,7 +413,7 @@ class PublicSuffix {
   }
 
   String _buildRegistrableDomain(String root, String suffix) {
-    return (root.isNotEmpty ? "$root.$suffix" : null);
+    return (root.isNotEmpty ? '$root.$suffix' : null);
   }
 
   String _getSubdomain(String host, String registrableDomain) {
@@ -352,3 +430,5 @@ class PublicSuffix {
     return sub;
   }
 }
+
+enum Leniency { strict, allowEmptyUrl, allowAll }

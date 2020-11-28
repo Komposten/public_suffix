@@ -1,13 +1,18 @@
-import 'package:public_suffix/public_suffix_io.dart';
+import 'package:public_suffix/io_helper.dart';
+import 'package:public_suffix/public_suffix.dart';
 
+// This is an example that creates an instance of SuffixRules
+// directly and uses that instead of DefaultSuffixRules.
 Future<void> main() async {
-  // Load a list of suffix rules from publicsuffix.org.
-  await SuffixRulesHelper.initFromUri(
+  // Create a SuffixRules instance from a list of suffix rules from
+  // publicsuffix.org.
+  var suffixRules = await SuffixRulesHelper.createListFromUri(
       Uri.parse('https://publicsuffix.org/list/public_suffix_list.dat'));
 
   // Parse a URL.
-  PublicSuffix parsedUrl =
-      PublicSuffix.fromString('https://www.komposten.github.io');
+  // Specify a rule list to use that instead of DefaultSuffixRules.
+  var parsedUrl = PublicSuffix.fromString('https://www.komposten.github.io',
+      suffixRules: suffixRules);
 
   // Results when matching against both ICANN/IANA and private suffixes.
   print(parsedUrl.suffix); // github.io
@@ -23,8 +28,4 @@ Future<void> main() async {
   parsedUrl = PublicSuffix.fromString('https://www.xn--6qq79v.cn');
   print(parsedUrl.domain); // xn--6qq79v.cn
   print(parsedUrl.punyDecoded.domain); // 你好.cn
-
-  // Dispose the list to unload it from memory if you wish.
-  // This is probably not needed since the list is relatively small.
-  SuffixRules.dispose();
 }

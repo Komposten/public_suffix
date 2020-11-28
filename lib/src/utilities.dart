@@ -25,8 +25,8 @@ class DomainUtils {
   ///
   /// Throws a [StateError] if [SuffixRules] has not been initialised.
   static bool isSubdomainOf(Uri potentialSub, Uri root, {bool icann = false}) {
-    var parsedUrl = PublicSuffix(potentialSub);
-    var parsedRoot = PublicSuffix(root);
+    var parsedUrl = PublicSuffix(url: potentialSub);
+    var parsedRoot = PublicSuffix(url: root);
 
     return parsedUrl.isSubdomainOf(parsedRoot, icann: icann);
   }
@@ -41,24 +41,26 @@ class DomainUtils {
   /// Throws a [StateError] if [SuffixRules] has not been initialised.
   static bool isSubdomain(Uri potentialSub, {bool icann = false}) {
     if (icann) {
-      return PublicSuffix(potentialSub).icannSubdomain != null;
+      return PublicSuffix(url: potentialSub).icannSubdomain != null;
     } else {
-      return PublicSuffix(potentialSub).subdomain != null;
+      return PublicSuffix(url: potentialSub).subdomain != null;
     }
   }
 
-  /// Checks if [suffix] is a known url suffix.
+  /// Checks if [suffix] is a known url suffix
   ///
-  /// For example, `co.uk` is known but `example` is not.
+  /// For example, `co.uk` might be known but not `example`.
   ///
-  /// Throws a [StateError] if [SuffixRules] has not been initialised.
-  static bool isKnownSuffix(String suffix) {
-    if (!SuffixRules.hasInitialised()) {
-      throw StateError('PublicSuffixList has not been initialised!');
-    }
+  /// [suffixRules] can be used to specify which suffix list to
+  /// check, otherwise [DefaultSuffixRules.rules] is used.
+  ///
+  /// Throws a [StateError] if [suffixRules] is null and
+  /// [DefaultSuffixRules] has not been initialised.
+  static bool isKnownSuffix(String suffix, {SuffixRules suffixRules}) {
+    suffixRules ??= DefaultSuffixRules.rulesOrThrow();
 
     var split = suffix.split('.');
-    var rules = SuffixRules.ruleMap[split.last] ?? <String>[];
+    var rules = suffixRules.ruleMap[split.last] ?? <String>[];
     var isKnown = false;
 
     for (var rule in rules) {
@@ -81,7 +83,7 @@ class DomainUtils {
   /// Throws a [StateError] if [SuffixRules] has not been initialised.
   static bool hasValidDomain(Uri domain,
       {bool icann = false, bool acceptDefaultRule = true}) {
-    return PublicSuffix(domain)
+    return PublicSuffix(url: domain)
         .hasValidDomain(icann: icann, acceptDefaultRule: acceptDefaultRule);
   }
 }

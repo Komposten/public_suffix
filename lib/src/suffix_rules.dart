@@ -8,134 +8,72 @@
  * of this project.
  */
 
-/// A wrapper for a static list containing rules for public suffixes.
-///
-/// After initialisation the rules can be accessed using [rules]. The list
-/// can be disposed of using [dispose] if it is no longer needed.
-class SuffixRules {
-  static List<Rule> _rules;
-  static Map<String, Iterable<Rule>> _ruleMap;
+import 'package:public_suffix/src/suffix_rules_parser.dart';
 
-  SuffixRules._();
+/// A Dart-representation of a list of public suffix rules.
+///
+/// Rules are parsed from either a string or a list and can
+/// then be accessed using [rules] or [ruleMap].
+class SuffixRules {
+  List<Rule> _rules;
+  Map<String, Iterable<Rule>> _ruleMap;
 
   /// Returns an unmodifiable list containing the current rules in the original order.
-  ///
-  /// [null] is returned if the list has not been initialised.
-  static List<Rule> get rules =>
-      _rules != null ? List.unmodifiable(_rules) : null;
+  List<Rule> get rules => List.unmodifiable(_rules);
 
   /// Returns an unmodifiable map containing the current rules.
   ///
   /// In each pair in the list the key is a label and the value a list of all
   /// rules that end with that label.
-  /// [null] is returned if the map has not been initialised.
-  static Map<String, Iterable<Rule>> get ruleMap =>
-      _ruleMap != null ? Map.unmodifiable(_ruleMap) : null;
+  Map<String, Iterable<Rule>> get ruleMap => Map.unmodifiable(_ruleMap);
 
-  /// Checks if the rule list has been initialised.
-  static bool hasInitialised() => _rules != null;
+  /// Checks whether or not at least this object contains at least one rule.
+  bool hasRules() => _rules.isNotEmpty;
 
-  /// Initialises the rule list.
+  /// Creates a new rule list from a multi-rule string.
   ///
   /// [rules] is expected to contain the contents of a suffix list with one rule per line.
-  /// The list is expected to follow the same format as the list at [publicsuffix.org](https://publicsuffix.org/list/public_suffix_list.dat).
-  /// This includes the `BEGIN PRIVATE` tag/comment, which [process] uses to separate
-  /// ICANN/IANA rules from private rules.
-  static void initFromString(String rules) {
-    initFromList(rules.split(RegExp(r'[\r\n]+')));
-  }
+  /// The list is expected to follow the same format as the list at
+  /// [publicsuffix.org](https://publicsuffix.org/list/public_suffix_list.dat).
+  /// This includes the `BEGIN PRIVATE` and `END PRIVATE` tags/comments,
+  /// which are used by [process] to separate ICANN/IANA rules from private rules.
+  SuffixRules.fromString(String rules)
+      : this.fromList(rules?.split(RegExp(r'[\r\n]+')));
 
-  /// Initialises the rule list.
+  /// Creates a new rule list from a list of rule strings.
   ///
-  /// [rules] is expected to contain the contents of a suffix list with one rule per element.
+  /// [rules] is expected to contain the contents of a suffix list with one rule
+  /// or comment per element. This includes the `BEGIN PRIVATE` and `END PRIVATE`
+  /// tags/comments, which are used by [process] to separate ICANN/IANA rules
+  /// from private rules.
   /// See [publicsuffix.org](https://publicsuffix.org/list/public_suffix_list.dat)
   /// for the rule format.
-  static void initFromList(List<String> rules) {
-    var processed = process(rules);
-    validate(processed);
-    _rules = processed;
-    _ruleMap = _listToMap(_rules);
+  SuffixRules.fromList(List<String> rules) {
+    rules ??= [];
+    var parser = SuffixRulesParser();
+    var processed = parser.process(rules);
+    parser.validate(processed);
+    _setRules(processed);
   }
 
-  /// Converts a list of strings into a list of rules.
+  /// Creates a new rule list from a list of [Rule]s.
   ///
-  /// Lines that contain comments (start with `//`) or are empty (i.e. zero-length
-  /// or only contain whitespace characters) are removed completely.
-  ///
-  /// Since [publicsuffix.org](https://publicsuffix.org/list/) defines rules as
-  /// the part of a line _before_ the first whitespace character, any text that
-  /// follows after this is also removed.
-  ///
-  /// Finally, all lines are changed to lower case to ease case-insensitive
-  /// comparisons later.
-  ///
-  /// The resulting list is returned as a list of [Rule]s. If [rules] contains a
-  /// line with a comment and the text `BEGIN PRIVATE`, all rules after that line
-  /// are marked as `isIcann = false`.
-  static List<Rule> process(List<String> rules) {
-    var isIcann = true;
-    var newList = <Rule>[];
-
-    for (var line in rules) {
-      if (_isComment(line) && line.contains("BEGIN PRIVATE")) {
-        isIcann = false;
-      } else if (!_isComment(line) && !_isEmpty(line)) {
-        var firstSpace = line.indexOf(' ');
-
-        if (firstSpace != -1) {
-          line = line.substring(0, firstSpace).trim();
-        }
-
-        newList.add(Rule(line.toLowerCase(), isIcann: isIcann));
-      }
-    }
-
-    return newList;
+  /// [rules] will be validated using a [SuffixRulesParser]
+  /// and a [FormatException] will be thrown if one or more
+  /// rules are invalid.
+  SuffixRules.fromRules(List<Rule> rules) {
+    rules ??= [];
+    var parser = SuffixRulesParser();
+    parser.validate(rules);
+    _setRules(rules);
   }
 
-  /// Validates the format of the provided rules.
-  ///
-  /// The content of [rules] is validated against the expected format
-  /// as described on [publicsuffix.org](https://publicsuffix.org/list/).
-  /// [rules] is expected to first have been passed through [process].
-  ///
-  /// In brief:
-  ///
-  /// * Rules should not start with a period (.)
-  /// * Rules may contain asterisks (*) as wildcards
-  ///     * Wildcards must be surrounded by periods or the line start/end
-  ///     * Example: `*.uk` is valid, `c*.uk` is not
-  /// * Rules that start with exclamation marks (!) mark exceptions to previous rules
-  ///     * Example: `!co.uk` would exclude `co.uk` from `*.uk`
-  ///
-  /// If at least one rule in the list is invalid, a [FormatException] is thrown
-  /// containing information about the amount of invalid lines in the message.
-  static void validate(List<Rule> rules) {
-    int invalidRules = 0;
-
-    for (var rule in rules) {
-      if (_isComment(rule.labels) ||
-          _isEmpty(rule.labels) ||
-          !_isValidRule(rule.labels)) {
-        invalidRules++;
-      }
-    }
-
-    if (invalidRules > 0) {
-      throw FormatException(
-          "Invalid suffix list: $invalidRules/${rules.length} lines are not formatted properly!");
-    }
+  void _setRules(List<Rule> rules) {
+    _rules = rules;
+    _ruleMap = _listToMap(rules);
   }
 
-  static bool _isEmpty(String line) => RegExp(r'^\s*$').hasMatch(line);
-
-  static bool _isComment(String line) => line.trimLeft().startsWith('//');
-
-  static bool _isValidRule(String line) =>
-      RegExp(r'^(?:\*|[^*.!\s][^*.!\s]*)(?:\.(?:[*]|[^*.\s]+))*$')
-          .hasMatch(line);
-
-  static Map<String, Iterable<Rule>> _listToMap(List<Rule> rules) {
+  Map<String, Iterable<Rule>> _listToMap(List<Rule> rules) {
     var map = <String, List<Rule>>{};
     for (var rule in rules) {
       var lastLabel = rule.labels.substring(rule.labels.lastIndexOf('.') + 1);
@@ -148,14 +86,6 @@ class SuffixRules {
     }
 
     return map;
-  }
-
-  /// Disposes of the suffix list.
-  ///
-  /// [hasInitialised] will return [false] after this has been called.
-  static void dispose() {
-    _rules = null;
-    _ruleMap = null;
   }
 }
 
@@ -172,29 +102,30 @@ class Rule {
   /// If the rule is an ICANN/IANA rule.
   final bool isIcann;
 
-  List<int> _wildcards;
+  List<String> _parts;
 
   Rule(String rule, {this.isIcann = true})
       : isException = rule.startsWith('!'),
         labels = rule.startsWith('!') ? rule.substring(1) : rule {
-    _wildcards = '*'.allMatches(labels).map((m) => m.start).toList();
+    _parts = labels.split('.');
   }
 
   bool matches(String host) {
     var hostParts = host.split('.')..removeWhere((e) => e.isEmpty);
-    var ruleParts = labels.split('.');
 
-    if (ruleParts.length <= hostParts.length) {
-      hostParts = hostParts.sublist(hostParts.length - ruleParts.length);
+    if (_parts.length <= hostParts.length) {
+      hostParts = hostParts.sublist(hostParts.length - _parts.length);
 
-      if (_wildcards.isNotEmpty) {
-        for (var index in _wildcards) {
-          hostParts[index] = '*';
+      for (var i = 0; i < hostParts.length; i++) {
+        if (_parts[i] != '*' && _parts[i] != hostParts[i]) {
+          return false;
         }
       }
-    }
 
-    return labels == hostParts.join('.');
+      return true;
+    } else {
+      return false;
+    }
   }
 
   @override
@@ -204,7 +135,7 @@ class Rule {
 
   @override
   int get hashCode {
-    int result = 1;
+    var result = 1;
 
     result = 31 * result + (labels != null ? labels.hashCode : 0);
     result = 31 * result + (isException ? 1231 : 1237);
@@ -217,9 +148,7 @@ class Rule {
   bool operator ==(other) {
     if (identical(this, other)) {
       return true;
-    } else if (other == null) {
-      return false;
-    } else if (runtimeType != other.runtimeType) {
+    } else if (!(other is Rule)) {
       return false;
     }
 

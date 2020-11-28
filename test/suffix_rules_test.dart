@@ -2,247 +2,126 @@ import 'package:public_suffix/src/suffix_rules.dart';
 import 'package:test/test.dart';
 
 void main() {
-  group('process_', () {
-    test('comments_remove', () {
-      var lines = <String>['//some comment', '//another comment'];
-
-      expect(SuffixRules.process(lines), hasLength(0));
-    });
-
-    test('emptyLines_remove', () {
-      var lines = <String>['', ' ', ' \t \t \t \t '];
-
-      expect(SuffixRules.process(lines), hasLength(0));
-    });
-
-    test('rules_dontRemove', () {
-      var lines = <String>['br', 'nom.br', '*.br', '!br'];
-
-      expect(SuffixRules.process(lines), hasLength(4));
-    });
-
-    test('mixedCaseRules_changeToLowerCase', () {
-      var lines = <String>['bR', 'NOM.br', '*.br', '!BR'];
-
-      expect(SuffixRules.process(lines),
-          containsAll([Rule('br'), Rule('nom.br'), Rule('*.br'), Rule('!br')]));
-    });
-
-    test('rules_removeTextAfterSpace', () {
-      var lines = <String>['br', 'nom.br', 'br2 and a comment', '*.br', '!br'];
-
-      expect(
-          SuffixRules.process(lines),
-          containsAll([
-            Rule('br'),
-            Rule('nom.br'),
-            Rule('br2'),
-            Rule('*.br'),
-            Rule('!br')
-          ]));
-    });
-
-    test('mixed_removeCommentsEmptyAndTrailingText', () {
-      var lines = <String>[
-        '//some comment',
-        'br',
-        '  ',
-        'nom.br and more',
-      ];
-      var processed = SuffixRules.process(lines);
-
-      expect(processed, hasLength(2));
-      expect(processed, containsAll([Rule('br'), Rule('nom.br')]));
-    });
-
-    test('mixed_dontAlterInputList', () {
-      var lines = <String>[
-        '//some comment',
-        'br',
-        'nom.br',
-        '//another comment'
-      ];
-
-      SuffixRules.process(lines);
-      expect(lines, hasLength(4));
-    });
-
-    test('withPrivateSeparator_markPrivateAsNotIcann', () {
-      var lines = <String>['br', 'nom.br', '//BEGIN PRIVATE', 'pr', 'nom.pr'];
-
-      var processed = SuffixRules.process(lines);
-      expect(processed, hasLength(4));
-      expect(
-          processed,
-          containsAll([
-            Rule('br'),
-            Rule('nom.br'),
-            Rule('pr', isIcann: false),
-            Rule('nom.pr', isIcann: false)
-          ]));
-    });
-  });
-
-  group('validate_', () {
-    test('validRules_dontThrow', () {
-      var lines = <Rule>[
-        Rule('br'),
-        Rule('!br'),
-        Rule('*'),
-        Rule('!*'),
-        Rule('mp.br'),
-        Rule('!mp.br'),
-        Rule('*.br'),
-        Rule('!*.br'),
-        Rule('mp.nom.br'),
-        Rule('!mp.nom.br'),
-        Rule('*.nom.br'),
-        Rule('!*.nom.br'),
-        Rule('*.*'),
-        Rule('!*.*'),
-        Rule('*.nom.*'),
-        Rule('!*.nom.*')
-      ];
-
-      SuffixRules.validate(lines);
-    });
-
-    test('comments_throw', () {
-      expect(() => SuffixRules.validate([Rule('br'), Rule('//br')]),
-          throwsFormatException);
-    });
-
-    test('emptyLines_throw', () {
-      expect(() => SuffixRules.validate([Rule('br'), Rule('')]),
-          throwsFormatException);
-      expect(() => SuffixRules.validate([Rule('br'), Rule(' ')]),
-          throwsFormatException);
-      expect(() => SuffixRules.validate([Rule('br'), Rule(' \t \t \t \t ')]),
-          throwsFormatException);
-    });
-
-    test('rulesWithTrailingText_throw', () {
-      expect(() => SuffixRules.validate([Rule('br'), Rule('br and more')]),
-          throwsFormatException);
-    });
-
-    test('invalidRules_throw', () {
-      expect(() => SuffixRules.validate([Rule('.br')]), throwsFormatException);
-      expect(() => SuffixRules.validate([Rule('br.')]), throwsFormatException);
-      expect(() => SuffixRules.validate([Rule('**')]), throwsFormatException);
-      expect(() => SuffixRules.validate([Rule('!!')]), throwsFormatException);
-      expect(() => SuffixRules.validate([Rule('b..r')]), throwsFormatException);
-    });
-  });
-
-  group('hasInitialised_', () {
-    tearDown(() => SuffixRules.dispose());
-
-    test('initialiseFirst_true', () {
-      SuffixRules.initFromList(['br']);
-      expect(SuffixRules.hasInitialised(), isTrue);
-    });
-
-    test('uninitialised_false', () {
-      expect(SuffixRules.hasInitialised(), isFalse);
-    });
-  });
-
-  test('dispose_initialiseFirst_uninitialise', () {
-    SuffixRules.initFromList(['br']);
-    SuffixRules.dispose();
-    expect(SuffixRules.hasInitialised(), isFalse);
-  });
-
   group('suffixList_', () {
-    tearDown(() => SuffixRules.dispose());
-
-    test('afterInitialising_returnList', () {
-      SuffixRules.initFromList(['br', 'nom.br']);
-      expect(SuffixRules.rules, isNotNull);
-      expect(SuffixRules.rules, hasLength(2));
-      expect(
-          SuffixRules.rules, containsAllInOrder([Rule('br'), Rule('nom.br')]));
-    });
-
-    test('beforeInitialising_returnNull', () {
-      expect(SuffixRules.rules, isNull);
-    });
-
-    test('modifyList_exception', () {
-      SuffixRules.initFromList(['br', 'nom.br']);
-      expect(() => SuffixRules.rules.add(Rule('!br')), throwsUnsupportedError);
-      expect(() => SuffixRules.rules.removeLast(), throwsUnsupportedError);
-      expect(() => SuffixRules.rules[0] = Rule('!br'), throwsUnsupportedError);
+    test('modifyList_throwsException', () {
+      var rules = SuffixRules.fromList(['br', 'nom.br']);
+      expect(() => rules.rules.add(Rule('!br')), throwsUnsupportedError);
+      expect(() => rules.rules.removeLast(), throwsUnsupportedError);
+      expect(() => rules.rules[0] = Rule('!br'), throwsUnsupportedError);
     });
   });
 
   group('ruleMap_', () {
-    tearDown(() => SuffixRules.dispose());
-
-    test('afterInitialising_returnMap', () {
-      SuffixRules.initFromList(['br', 'br.nom']);
-      expect(SuffixRules.ruleMap, isNotNull);
-      expect(SuffixRules.ruleMap, hasLength(2));
-      expect(SuffixRules.ruleMap, containsPair('br', [Rule('br')]));
+    test('_initialisedProperly', () {
+      var rules = SuffixRules.fromList(['br', 'br.nom']);
+      expect(rules.ruleMap, isNotNull);
+      expect(rules.ruleMap, hasLength(2));
+      expect(rules.ruleMap, containsPair('br', [Rule('br')]));
     });
 
-    test('beforeInitialising_returnNull', () {
-      expect(SuffixRules.ruleMap, isNull);
-    });
-
-    test('multipleRulesFromSameTld_combineIntoSameList', () {
-      SuffixRules.initFromList(['br', 'nom.br', 'nom.mer.br']);
-      expect(SuffixRules.ruleMap, isNotNull);
-      expect(SuffixRules.ruleMap, hasLength(1));
-      expect(SuffixRules.ruleMap,
+    test('multipleRulesFromSameTld_combinedIntoSameList', () {
+      var rules = SuffixRules.fromList(['br', 'nom.br', 'nom.mer.br']);
+      expect(rules.ruleMap, isNotNull);
+      expect(rules.ruleMap, hasLength(1));
+      expect(rules.ruleMap,
           containsPair('br', [Rule('br'), Rule('nom.br'), Rule('nom.mer.br')]));
     });
 
-    test('modifyMap_exception', () {
-      SuffixRules.initFromList(['br', 'nom.br']);
-      expect(() => SuffixRules.ruleMap['rb'] = [Rule('rb')],
-          throwsUnsupportedError);
-      expect(() => SuffixRules.ruleMap.remove('br'), throwsUnsupportedError);
+    test('modifyMap_throwsException', () {
+      var rules = SuffixRules.fromList(['br', 'nom.br']);
+      expect(() => rules.ruleMap['rb'] = [Rule('rb')], throwsUnsupportedError);
+      expect(() => rules.ruleMap.remove('br'), throwsUnsupportedError);
     });
   });
 
-  group('initFromList_', () {
+  group('fromList_', () {
     test('listWithComments_commentsRemoved', () {
       var lines = <String>['br', '//comment', 'nom.br'];
+      var rules = SuffixRules.fromList(lines);
 
-      SuffixRules.initFromList(lines);
-      expect(SuffixRules.rules, hasLength(2));
-      expect(SuffixRules.rules, containsAll([Rule('br'), Rule('nom.br')]));
+      expect(rules.rules, hasLength(2));
+      expect(rules.rules, containsAll([Rule('br'), Rule('nom.br')]));
     });
 
     test('listWithEmptyLines_emptyLinesRemoved', () {
       var lines = <String>['br', '', 'nom.br', ' ', ' \t \t \t '];
+      var rules = SuffixRules.fromList(lines);
 
-      SuffixRules.initFromList(lines);
-      expect(SuffixRules.rules, hasLength(2));
-      expect(SuffixRules.rules, containsAll([Rule('br'), Rule('nom.br')]));
+      expect(rules.rules, hasLength(2));
+      expect(rules.rules, containsAll([Rule('br'), Rule('nom.br')]));
     });
 
     test('listWithRulesWithTrailingText_trailingTextRemoved', () {
       var lines = <String>['br', 'nom.br and more'];
+      var rules = SuffixRules.fromList(lines);
 
-      SuffixRules.initFromList(lines);
-      expect(SuffixRules.rules, hasLength(2));
-      expect(SuffixRules.rules, containsAll([Rule('br'), Rule('nom.br')]));
+      expect(rules.rules, hasLength(2));
+      expect(rules.rules, containsAll([Rule('br'), Rule('nom.br')]));
     });
 
-    test('listWithInvalidRules_throw', () {
-      expect(() => SuffixRules.initFromList(['.br']), throwsFormatException);
+    test('listWithInvalidRules_throws', () {
+      expect(() => SuffixRules.fromList(['.br']), throwsFormatException);
+    });
+
+    test('emptyOrNullList_createsEmptyResult', () {
+      expect(() => SuffixRules.fromList([]), returnsNormally);
+      expect(SuffixRules.fromList([]).hasRules(), isFalse);
+      expect(() => SuffixRules.fromList(null), returnsNormally);
+      expect(SuffixRules.fromList(null).hasRules(), isFalse);
     });
   });
 
-  test('initFromString_mixedList_success', () {
-    var list = 'br\nnom.br\n//comment\n*.com and such\n';
+  group('fromString_', () {
+    test('mixedList_success', () {
+      var list = 'br\nnom.br\n//comment\n*.com and such\n';
+      var rules = SuffixRules.fromString(list);
 
-    SuffixRules.initFromString(list);
-    expect(SuffixRules.rules, hasLength(3));
-    expect(SuffixRules.rules,
-        containsAll([Rule('br'), Rule('nom.br'), Rule('*.com')]));
+      expect(rules.rules, hasLength(3));
+      expect(rules.rules,
+          containsAll([Rule('br'), Rule('nom.br'), Rule('*.com')]));
+    });
+
+    test('emptyOrNullString_createsEmptyResult', () {
+      expect(() => SuffixRules.fromString(''), returnsNormally);
+      expect(SuffixRules.fromString('').hasRules(), isFalse);
+      expect(() => SuffixRules.fromString(null), returnsNormally);
+      expect(SuffixRules.fromString(null).hasRules(), isFalse);
+    });
+  });
+  group('fromRules_', () {
+    test('listsInvalidRules_throws', () {
+      // With comment
+      expect(() => SuffixRules.fromRules([Rule('br'), Rule('//comment')]),
+          throwsFormatException);
+      // With empty rules
+      expect(() => SuffixRules.fromRules([Rule('br'), Rule('')]),
+          throwsFormatException);
+      expect(() => SuffixRules.fromRules([Rule('br'), Rule(' ')]),
+          throwsFormatException);
+      expect(() => SuffixRules.fromRules([Rule('br'), Rule('\t')]),
+          throwsFormatException);
+      // With trailing text
+      expect(() => SuffixRules.fromRules([Rule('br'), Rule('nom.br and more')]),
+          throwsFormatException);
+      // With invalid format
+      expect(() => SuffixRules.fromRules([Rule('.br')]), throwsFormatException);
+    });
+
+    test('emptyOrNullList_createsEmptyResult', () {
+      expect(() => SuffixRules.fromRules([]), returnsNormally);
+      expect(SuffixRules.fromRules([]).hasRules(), isFalse);
+      expect(() => SuffixRules.fromRules(null), returnsNormally);
+      expect(SuffixRules.fromRules(null).hasRules(), isFalse);
+    });
+  });
+
+  test('hasRules_noRules_false', () {
+    var rules = SuffixRules.fromString('');
+    expect(rules.hasRules(), isFalse);
+  });
+
+  test('hasRules_withRules_true', () {
+    var rules = SuffixRules.fromString('*.dev\n*.com');
+    expect(rules.hasRules(), isTrue);
   });
 }

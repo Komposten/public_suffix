@@ -29,8 +29,7 @@ void main() {
 
     test('modifyMap_throwsException', () {
       var rules = SuffixRules.fromList(['br', 'nom.br']);
-      expect(() => rules.ruleMap['rb'] = [Rule('rb')],
-          throwsUnsupportedError);
+      expect(() => rules.ruleMap['rb'] = [Rule('rb')], throwsUnsupportedError);
       expect(() => rules.ruleMap.remove('br'), throwsUnsupportedError);
     });
   });

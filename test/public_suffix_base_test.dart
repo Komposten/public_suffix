@@ -7,16 +7,16 @@ import 'io_test_utils.dart';
 
 void main() {
   test('PublicSuffix_defaultListNotInitialised_throwStateError', () {
-    expect(
-        () => PublicSuffix.fromUrl(Uri.parse('http://www.pub.dev')), throwsStateError);
+    expect(() => PublicSuffix.fromUrl(Uri.parse('http://www.pub.dev')),
+        throwsStateError);
     expect(
         () => PublicSuffix.fromString('http://www.pub.dev'), throwsStateError);
   });
 
   test('PublicSuffix_defaultListInitialised_success', () {
     DefaultSuffixRules.initFromString('*.dev');
-    expect(
-        () => PublicSuffix.fromUrl(Uri.parse('http://www.pub.dev')), returnsNormally);
+    expect(() => PublicSuffix.fromUrl(Uri.parse('http://www.pub.dev')),
+        returnsNormally);
     expect(
         () => PublicSuffix.fromString('http://www.pub.dev'), returnsNormally);
     DefaultSuffixRules.dispose();
@@ -25,7 +25,8 @@ void main() {
   test('PublicSuffix_rulesListProvided_success', () {
     var rules = SuffixRules.fromString('*.dev');
     expect(
-        () => PublicSuffix.fromUrl(Uri.parse('http://www.pub.dev'), suffixRules: rules),
+        () => PublicSuffix.fromUrl(Uri.parse('http://www.pub.dev'),
+            suffixRules: rules),
         returnsNormally);
     expect(
         () => PublicSuffix.fromString('http://www.pub.dev', suffixRules: rules),
@@ -34,7 +35,8 @@ void main() {
 
   test('PublicSuffix_uriWithoutAuthority_throwArgumentError', () async {
     DefaultSuffixRules.initFromString('');
-    expect(() => PublicSuffix.fromUrl(Uri.parse('www.pub.dev')), throwsArgumentError);
+    expect(() => PublicSuffix.fromUrl(Uri.parse('www.pub.dev')),
+        throwsArgumentError);
     expect(() => PublicSuffix.fromString('www.pub.dev'), throwsArgumentError);
     DefaultSuffixRules.dispose();
   });
@@ -51,8 +53,8 @@ void main() {
     });
 
     void testPublicSuffix(String url, String expectedRoot, String expectedTld) {
-      if (!url.startsWith("http")) {
-        url = "http://" + url;
+      if (!url.startsWith('http')) {
+        url = 'http://' + url;
       }
       var suffix = PublicSuffix(urlString: url);
       expect(suffix.root, equals(expectedRoot));
@@ -71,7 +73,7 @@ void main() {
 
     test('urlWithRegistrableDomain_correctRegistrableDomain', () {
       var suffix = PublicSuffix(urlString: 'http://www.pub.dev');
-      expect(suffix.domain, equals("${suffix.root}.${suffix.suffix}"));
+      expect(suffix.domain, equals('${suffix.root}.${suffix.suffix}'));
     });
 
     test('urlWithoutRegistrableDomain_registrableDomainAndSubdomainAreNull',

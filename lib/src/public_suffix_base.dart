@@ -159,8 +159,7 @@ class PublicSuffix {
   /// parsing the URL. If not specified, [DefaultSuffixRules.rules] will
   /// be used.
   factory PublicSuffix.fromString(String url,
-      {SuffixRules suffixRules,
-        Leniency leniency = Leniency.allowEmptyUrl}) {
+      {SuffixRules suffixRules, Leniency leniency = Leniency.allowEmptyUrl}) {
     try {
       return PublicSuffix(urlString: url, suffixRules: suffixRules);
     } catch (e) {
@@ -195,8 +194,7 @@ class PublicSuffix {
   /// parsing the URL. If not specified, [DefaultSuffixRules.rules] will
   /// be used.
   factory PublicSuffix.fromUrl(Uri url,
-      {SuffixRules suffixRules,
-        Leniency leniency = Leniency.allowEmptyUrl}) {
+      {SuffixRules suffixRules, Leniency leniency = Leniency.allowEmptyUrl}) {
     try {
       return PublicSuffix(url: url, suffixRules: suffixRules);
     } catch (e) {
@@ -239,7 +237,7 @@ class PublicSuffix {
     _sourceUrl = url ?? Uri.parse(urlString);
     if (!sourceUrl.hasAuthority) {
       throw ArgumentError(
-          "The URL is missing the authority component: $sourceUrl");
+          'The URL is missing the authority component: $sourceUrl');
     }
 
     suffixRules ??= DefaultSuffixRules.rulesOrThrow();
@@ -271,7 +269,7 @@ class PublicSuffix {
     _icannRoot = icannData['root'];
     _icannDomain = icannData['registrable'];
     _icannSubdomain = icannData['sub'];
-    _hasKnownSuffix = (prevailingAllRule.labels != "*");
+    _hasKnownSuffix = (prevailingAllRule.labels != '*');
 
     var puny = allData['puny'];
     var icannPuny = icannData['puny'];
@@ -288,7 +286,7 @@ class PublicSuffix {
 
     if (punycodes.isNotEmpty) {
       _sourcePunycoded = true;
-      int offset = 0;
+      var offset = 0;
       punycodes.forEach((match) {
         var decoded = punycodeDecode(match.group(0).substring(4));
         host = host.replaceRange(
@@ -325,9 +323,9 @@ class PublicSuffix {
 
   Rule _getPrevailingRule(List<Rule> matchingRules) {
     Rule prevailing;
-    int longestLength = 0;
+    var longestLength = 0;
 
-    for (Rule rule in matchingRules) {
+    for (var rule in matchingRules) {
       if (rule.isException) {
         prevailing = rule;
         break;
@@ -377,7 +375,7 @@ class PublicSuffix {
     var ruleLength = '.'.allMatches(prevailingRule.labels).length + 1;
 
     var index = host.length;
-    for (int i = 0; i < ruleLength; i++) {
+    for (var i = 0; i < ruleLength; i++) {
       index = host.lastIndexOf('.', index - 1);
     }
 
@@ -406,8 +404,8 @@ class PublicSuffix {
     return input.split('.').map((part) {
       var puny = punycodeEncode(part);
 
-      if (puny != "$part-" && puny != part) {
-        return "xn--$puny";
+      if (puny != '$part-' && puny != part) {
+        return 'xn--$puny';
       } else {
         return part;
       }
@@ -415,7 +413,7 @@ class PublicSuffix {
   }
 
   String _buildRegistrableDomain(String root, String suffix) {
-    return (root.isNotEmpty ? "$root.$suffix" : null);
+    return (root.isNotEmpty ? '$root.$suffix' : null);
   }
 
   String _getSubdomain(String host, String registrableDomain) {
@@ -433,8 +431,4 @@ class PublicSuffix {
   }
 }
 
-enum Leniency {
-  strict,
-  allowEmptyUrl,
-  allowAll
-}
+enum Leniency { strict, allowEmptyUrl, allowAll }

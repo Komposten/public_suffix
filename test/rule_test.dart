@@ -4,7 +4,7 @@ import 'package:test/test.dart';
 void main() {
   group('Rule_', () {
     test('exceptionRule_detectedProperly', () {
-      Rule rule = Rule('!a.b');
+      var rule = Rule('!a.b');
       expect(rule.isException, equals(true));
       expect(rule.labels, equals('a.b'));
     });
@@ -12,13 +12,13 @@ void main() {
 
   group('matches_', () {
     test('fixedRuleAndMatchingHosts_true', () {
-      Rule rule = Rule('ab.cd');
+      var rule = Rule('ab.cd');
       expect(rule.matches('ab.cd'), equals(true));
       expect(rule.matches('ef.ab.cd'), equals(true));
     });
 
     test('wildRuleAndMatchingHosts_true', () {
-      Rule rule = Rule('*.cd');
+      var rule = Rule('*.cd');
       expect(rule.matches('ab.cd'), equals(true));
       expect(rule.matches('ef.ab.cd'), equals(true));
 
@@ -29,14 +29,14 @@ void main() {
     });
 
     test('fixedRuleAndNonmatchingHosts_false', () {
-      Rule rule = Rule('ab.cd');
+      var rule = Rule('ab.cd');
       expect(rule.matches('ac.cb'), equals(false));
       expect(rule.matches('a.c'), equals(false));
       expect(rule.matches('cd.ab'), equals(false));
     });
 
     test('wildRuleAndNonmatchingHosts_false', () {
-      Rule rule = Rule('*.cd');
+      var rule = Rule('*.cd');
       expect(rule.matches('ab.dc'), equals(false));
 
       rule = Rule('*.a.*.b');
@@ -46,7 +46,7 @@ void main() {
     });
 
     test('hostsShorterThanRule_false', () {
-      Rule rule = Rule('a.b.c.d');
+      var rule = Rule('a.b.c.d');
       expect(rule.matches('b.c.d'), equals(false));
 
       rule = Rule('*.b.*.d');
@@ -54,7 +54,7 @@ void main() {
     });
 
     test('exceptionRuleAndMatchingHosts_true', () {
-      Rule rule = Rule('!ab.cd');
+      var rule = Rule('!ab.cd');
       expect(rule.matches('ab.cd'), equals(true));
       expect(rule.matches('ef.ab.cd'), equals(true));
     });

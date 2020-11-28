@@ -30,9 +30,9 @@ class SuffixRulesHelper {
   /// An [Exception] is thrown if the request fails.
   static Future<void> initDefaultListFromUri(Uri uri,
       {bool withCredentials,
-        Map<String, String> requestHeaders,
-        dynamic sendData,
-        void Function(ProgressEvent) onProgress}) async {
+      Map<String, String> requestHeaders,
+      dynamic sendData,
+      void Function(ProgressEvent) onProgress}) async {
     DefaultSuffixRules.initFromString(await _getUri(uri,
         withCredentials: withCredentials,
         requestHeaders: requestHeaders,
@@ -52,9 +52,9 @@ class SuffixRulesHelper {
   /// An [Exception] is thrown if the request fails.
   static Future<SuffixRules> createListFromUri(Uri uri,
       {bool withCredentials,
-        Map<String, String> requestHeaders,
-        dynamic sendData,
-        void Function(ProgressEvent) onProgress}) async {
+      Map<String, String> requestHeaders,
+      dynamic sendData,
+      void Function(ProgressEvent) onProgress}) async {
     return SuffixRules.fromString(await _getUri(uri,
         withCredentials: withCredentials,
         requestHeaders: requestHeaders,
@@ -90,9 +90,9 @@ class SuffixRulesHelper {
 
       if (object is HttpRequest) {
         throw Exception(
-            "Request for public suffix list failed: [${object.status}] ${object.statusText}");
+            'Request for public suffix list failed: [${object.status}] ${object.statusText}');
       } else {
-        throw Exception("Request for public suffix list failed: $object");
+        throw Exception('Request for public suffix list failed: $object');
       }
     }
   }

@@ -11,8 +11,7 @@ Future<void> main() async {
 
   // Parse a URL.
   // Specify a rule list to use that instead of DefaultSuffixRules.
-  PublicSuffix parsedUrl = PublicSuffix.fromString(
-      'https://www.komposten.github.io',
+  var parsedUrl = PublicSuffix.fromString('https://www.komposten.github.io',
       suffixRules: suffixRules);
 
   // Results when matching against both ICANN/IANA and private suffixes.

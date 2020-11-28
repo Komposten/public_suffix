@@ -37,7 +37,8 @@ class SuffixRules {
   /// [publicsuffix.org](https://publicsuffix.org/list/public_suffix_list.dat).
   /// This includes the `BEGIN PRIVATE` and `END PRIVATE` tags/comments,
   /// which are used by [process] to separate ICANN/IANA rules from private rules.
-  SuffixRules.fromString(String rules): this.fromList(rules?.split(RegExp(r'[\r\n]+')));
+  SuffixRules.fromString(String rules)
+      : this.fromList(rules?.split(RegExp(r'[\r\n]+')));
 
   /// Creates a new rule list from a list of rule strings.
   ///
@@ -115,7 +116,7 @@ class Rule {
     if (_parts.length <= hostParts.length) {
       hostParts = hostParts.sublist(hostParts.length - _parts.length);
 
-      for (int i = 0; i < hostParts.length; i++) {
+      for (var i = 0; i < hostParts.length; i++) {
         if (_parts[i] != '*' && _parts[i] != hostParts[i]) {
           return false;
         }
@@ -134,7 +135,7 @@ class Rule {
 
   @override
   int get hashCode {
-    int result = 1;
+    var result = 1;
 
     result = 31 * result + (labels != null ? labels.hashCode : 0);
     result = 31 * result + (isException ? 1231 : 1237);
@@ -147,9 +148,7 @@ class Rule {
   bool operator ==(other) {
     if (identical(this, other)) {
       return true;
-    } else if (other == null) {
-      return false;
-    } else if (runtimeType != other.runtimeType) {
+    } else if (!(other is Rule)) {
       return false;
     }
 

@@ -70,7 +70,7 @@ class SuffixRulesParser {
   /// If at least one rule in the list is invalid, a [FormatException] is thrown
   /// containing information about the amount of invalid lines in the message.
   void validate(List<Rule> rules) {
-    int invalidRules = 0;
+    var invalidRules = 0;
 
     for (var rule in rules) {
       if (_isComment(rule.labels) ||
@@ -82,7 +82,7 @@ class SuffixRulesParser {
 
     if (invalidRules > 0) {
       throw FormatException(
-          "Invalid suffix list: $invalidRules/${rules.length} lines are not formatted properly!");
+          'Invalid suffix list: $invalidRules/${rules.length} lines are not formatted properly!');
     }
   }
 

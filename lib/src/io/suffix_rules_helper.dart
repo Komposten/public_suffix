@@ -58,7 +58,7 @@ class SuffixRulesHelper {
   }
 
   static Future<String> _getFile(Uri fileUri) async {
-    File file = File.fromUri(fileUri);
+    var file = File.fromUri(fileUri);
     return await file.readAsString();
   }
 
@@ -72,7 +72,7 @@ class SuffixRulesHelper {
         break;
       default:
         throw Exception(
-            "Request for public suffix list failed: [${response.statusCode}]");
+            'Request for public suffix list failed: [${response.statusCode}]');
     }
   }
 }

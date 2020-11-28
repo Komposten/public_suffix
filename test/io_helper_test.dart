@@ -1,7 +1,8 @@
-@TestOn("vm")
-import 'package:test/test.dart';
-import 'package:public_suffix/public_suffix.dart';
 import 'package:public_suffix/io_helper.dart';
+import 'package:public_suffix/public_suffix.dart';
+@TestOn('vm')
+import 'package:test/test.dart';
+
 import 'io_test_utils.dart';
 
 void main() {
@@ -17,13 +18,14 @@ void main() {
 
     test('resourceDoesNotExist_fail', () async {
       var uri = Uri.parse(
-          "https://raw.githubusercontent.com/Komposten/public_suffix/master/test/res/i_dont_exist.dat");
+          'https://raw.githubusercontent.com/Komposten/public_suffix/master/test/res/i_dont_exist.dat');
       expect(SuffixRulesHelper.initDefaultListFromUri(uri), throwsException);
     });
 
     test('invalidUrl_throwException', () async {
       expect(
-          SuffixRulesHelper.initDefaultListFromUri(Uri.parse('http://127.0.0.2/list.dat')),
+          SuffixRulesHelper.initDefaultListFromUri(
+              Uri.parse('http://127.0.0.2/list.dat')),
           throwsException);
     });
 
@@ -43,18 +45,20 @@ void main() {
 
     test('resourceDoesNotExist_fail', () async {
       var uri = Uri.parse(
-          "https://raw.githubusercontent.com/Komposten/public_suffix/master/test/res/i_dont_exist.dat");
+          'https://raw.githubusercontent.com/Komposten/public_suffix/master/test/res/i_dont_exist.dat');
       expect(SuffixRulesHelper.createListFromUri(uri), throwsException);
     });
 
     test('invalidUrl_throwException', () async {
       expect(
-          SuffixRulesHelper.createListFromUri(Uri.parse('http://127.0.0.2/list.dat')),
+          SuffixRulesHelper.createListFromUri(
+              Uri.parse('http://127.0.0.2/list.dat')),
           throwsException);
     });
 
     test('validFileUri_initList', () async {
-      var rules = await SuffixRulesHelper.createListFromUri(getSuffixListFileUri());
+      var rules =
+          await SuffixRulesHelper.createListFromUri(getSuffixListFileUri());
       expect(rules.rules, isNotEmpty);
     });
   });

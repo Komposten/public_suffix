@@ -33,12 +33,12 @@ import 'package:public_suffix/public_suffix.dart';
 
 main() {
   // Load a list of suffix rules from publicsuffix.org.
-  String suffixListString = 'load the list into this string';
+  var suffixListString = 'load the list into this string';
   DefaultSuffixRules.initFromString(suffixListString);
 	  
   // Parse a URL.
-  PublicSuffix parsedUrl =
-      PublicSuffix.fromString('https://www.komposten.github.io');
+  var parsedUrl =
+        PublicSuffix.fromString('https://www.komposten.github.io');
 	  
   // Obtain information using the many getters, for example:
   print(parsedUrl.suffix);      // github.io
@@ -52,6 +52,7 @@ main() {
   print(parsedUrl.punyDecoded.domain); // 你好.cn
 }
 ```
+
 ## Obtaining a suffix list
 public_suffix requires a list of suffix rules to work. There is no list bundled by default as these lists are updated frequently.
 
@@ -80,7 +81,7 @@ There are two ways of initialising it:
    import 'package:public_suffix/io_helper.dart';
    
    main() async {
-     Uri uri = Uri.parse('https://publicsuffix.org/list/public_suffix_list.dat');
+     var uri = Uri.parse('https://publicsuffix.org/list/public_suffix_list.dat');
      await SuffixRulesHelper.initDefaultListFromUri(listUri);
    }
    ```
@@ -106,7 +107,7 @@ Just like before, there are two ways of doing this:
    import 'package:public_suffix/io_helper.dart';
    
    main() async {
-     Uri uri = Uri.parse('https://publicsuffix.org/list/public_suffix_list.dat');
+     var uri = Uri.parse('https://publicsuffix.org/list/public_suffix_list.dat');
      var suffixRules = await SuffixRulesHelper.createListFromUri(listUri);
    }
    ```

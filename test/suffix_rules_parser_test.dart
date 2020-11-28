@@ -9,7 +9,6 @@ void main() {
   });
 
   group('process_', () {
-
     test('comments_remove', () {
       var lines = <String>['//some comment', '//another comment'];
 
@@ -90,7 +89,14 @@ void main() {
     });
 
     test('withPrivateBlock_respectBlockEndComment', () {
-      var lines = <String>['br', '//BEGIN PRIVATE', 'nom.br', '//END PRIVATE', 'pr', 'nom.pr'];
+      var lines = <String>[
+        'br',
+        '//BEGIN PRIVATE',
+        'nom.br',
+        '//END PRIVATE',
+        'pr',
+        'nom.pr'
+      ];
 
       var processed = parser.process(lines);
       expect(processed, hasLength(4));
@@ -135,8 +141,8 @@ void main() {
     });
 
     test('emptyLines_throw', () {
-      expect(() => parser.validate([Rule('br'), Rule('')]),
-          throwsFormatException);
+      expect(
+          () => parser.validate([Rule('br'), Rule('')]), throwsFormatException);
       expect(() => parser.validate([Rule('br'), Rule(' ')]),
           throwsFormatException);
       expect(() => parser.validate([Rule('br'), Rule(' \t \t \t \t ')]),

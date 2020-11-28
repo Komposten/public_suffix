@@ -38,16 +38,20 @@ class SuffixRules {
   /// Initialises the rule list.
   ///
   /// [rules] is expected to contain the contents of a suffix list with one rule per line.
-  /// The list is expected to follow the same format as the list at [publicsuffix.org](https://publicsuffix.org/list/public_suffix_list.dat).
-  /// This includes the `BEGIN PRIVATE` tag/comment, which [process] uses to separate
-  /// ICANN/IANA rules from private rules.
-  static void initFromString(String rules) {
+  /// The list is expected to follow the same format as the list at
+  /// [publicsuffix.org](https://publicsuffix.org/list/public_suffix_list.dat).
+  /// This includes the `BEGIN PRIVATE` and `END PRIVATE` tags/comments,
+  /// which are used by [process] to separate ICANN/IANA rules from private rules.
+  SuffixRules.fromString(String rules) {
     initFromList(rules.split(RegExp(r'[\r\n]+')));
   }
 
   /// Initialises the rule list.
   ///
-  /// [rules] is expected to contain the contents of a suffix list with one rule per element.
+  /// [rules] is expected to contain the contents of a suffix list with one rule
+  /// or comment per element. This includes the `BEGIN PRIVATE` and `END PRIVATE`
+  /// tags/comments, which are used by [process] to separate ICANN/IANA rules
+  /// from private rules.
   /// See [publicsuffix.org](https://publicsuffix.org/list/public_suffix_list.dat)
   /// for the rule format.
   static void initFromList(List<String> rules) {
@@ -69,16 +73,20 @@ class SuffixRules {
   /// Finally, all lines are changed to lower case to ease case-insensitive
   /// comparisons later.
   ///
-  /// The resulting list is returned as a list of [Rule]s. If [rules] contains a
-  /// line with a comment and the text `BEGIN PRIVATE`, all rules after that line
-  /// are marked as `isIcann = false`.
+  /// The resulting list is returned as a list of [Rule]s. Comments containing
+  /// `BEGIN PRIVATE` and `END PRIVATE` can be used to indicate a section of rules
+  /// that should be marked as `isIcann = false` ("private rules").
   static List<Rule> process(List<String> rules) {
     var isIcann = true;
     var newList = <Rule>[];
 
     for (var line in rules) {
-      if (_isComment(line) && line.contains("BEGIN PRIVATE")) {
-        isIcann = false;
+      if (_isComment(line)) {
+        if (line.contains('BEGIN PRIVATE')) {
+          isIcann = false;
+        } else if (line.contains('END PRIVATE')) {
+          isIcann = true;
+        }
       } else if (!_isComment(line) && !_isEmpty(line)) {
         var firstSpace = line.indexOf(' ');
 

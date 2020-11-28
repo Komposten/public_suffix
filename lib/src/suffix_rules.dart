@@ -37,7 +37,7 @@ class SuffixRules {
   /// [publicsuffix.org](https://publicsuffix.org/list/public_suffix_list.dat).
   /// This includes the `BEGIN PRIVATE` and `END PRIVATE` tags/comments,
   /// which are used by [process] to separate ICANN/IANA rules from private rules.
-  SuffixRules.fromString(String rules): this.fromList(rules.split(RegExp(r'[\r\n]+')));
+  SuffixRules.fromString(String rules): this.fromList(rules?.split(RegExp(r'[\r\n]+')));
 
   /// Creates a new rule list from a list of rule strings.
   ///
@@ -48,8 +48,8 @@ class SuffixRules {
   /// See [publicsuffix.org](https://publicsuffix.org/list/public_suffix_list.dat)
   /// for the rule format.
   SuffixRules.fromList(List<String> rules) {
+    rules ??= [];
     var parser = SuffixRulesParser();
-    // TODO jhj: use an empty list if rules is null, and same for fromString and fromRules
     var processed = parser.process(rules);
     parser.validate(processed);
     _setRules(processed);
@@ -61,6 +61,7 @@ class SuffixRules {
   /// and a [FormatException] will be thrown if one or more
   /// rules are invalid.
   SuffixRules.fromRules(List<Rule> rules) {
+    rules ??= [];
     var parser = SuffixRulesParser();
     parser.validate(rules);
     _setRules(rules);

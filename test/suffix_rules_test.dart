@@ -35,7 +35,7 @@ void main() {
     });
   });
 
-  group('initFromList_', () {
+  group('fromList_', () {
     test('listWithComments_commentsRemoved', () {
       var lines = <String>['br', '//comment', 'nom.br'];
       var rules = SuffixRules.fromList(lines);
@@ -63,15 +63,57 @@ void main() {
     test('listWithInvalidRules_throws', () {
       expect(() => SuffixRules.fromList(['.br']), throwsFormatException);
     });
+
+    test('emptyOrNullList_createsEmptyResult', () {
+      expect(() => SuffixRules.fromList([]), returnsNormally);
+      expect(SuffixRules.fromList([]).hasRules(), isFalse);
+      expect(() => SuffixRules.fromList(null), returnsNormally);
+      expect(SuffixRules.fromList(null).hasRules(), isFalse);
+    });
   });
 
-  test('fromString_mixedList_success', () {
-    var list = 'br\nnom.br\n//comment\n*.com and such\n';
-    var rules = SuffixRules.fromString(list);
+  group('fromString_', () {
+    test('mixedList_success', () {
+      var list = 'br\nnom.br\n//comment\n*.com and such\n';
+      var rules = SuffixRules.fromString(list);
 
-    expect(rules.rules, hasLength(3));
-    expect(rules.rules,
-        containsAll([Rule('br'), Rule('nom.br'), Rule('*.com')]));
+      expect(rules.rules, hasLength(3));
+      expect(rules.rules,
+          containsAll([Rule('br'), Rule('nom.br'), Rule('*.com')]));
+    });
+
+    test('emptyOrNullString_createsEmptyResult', () {
+      expect(() => SuffixRules.fromString(''), returnsNormally);
+      expect(SuffixRules.fromString('').hasRules(), isFalse);
+      expect(() => SuffixRules.fromString(null), returnsNormally);
+      expect(SuffixRules.fromString(null).hasRules(), isFalse);
+    });
+  });
+  group('fromRules_', () {
+    test('listsInvalidRules_throws', () {
+      // With comment
+      expect(() => SuffixRules.fromRules([Rule('br'), Rule('//comment')]),
+          throwsFormatException);
+      // With empty rules
+      expect(() => SuffixRules.fromRules([Rule('br'), Rule('')]),
+          throwsFormatException);
+      expect(() => SuffixRules.fromRules([Rule('br'), Rule(' ')]),
+          throwsFormatException);
+      expect(() => SuffixRules.fromRules([Rule('br'), Rule('\t')]),
+          throwsFormatException);
+      // With trailing text
+      expect(() => SuffixRules.fromRules([Rule('br'), Rule('nom.br and more')]),
+          throwsFormatException);
+      // With invalid format
+      expect(() => SuffixRules.fromRules([Rule('.br')]), throwsFormatException);
+    });
+
+    test('emptyOrNullList_createsEmptyResult', () {
+      expect(() => SuffixRules.fromRules([]), returnsNormally);
+      expect(SuffixRules.fromRules([]).hasRules(), isFalse);
+      expect(() => SuffixRules.fromRules(null), returnsNormally);
+      expect(SuffixRules.fromRules(null).hasRules(), isFalse);
+    });
   });
 
   test('hasRules_noRules_false', () {

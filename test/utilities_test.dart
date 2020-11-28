@@ -20,8 +20,8 @@ void main() {
           {bool icann = false}) {
         var uri1 = Uri.parse(domain1);
         var uri2 = Uri.parse(domain2);
-        var publicSuffix1 = PublicSuffix(uri1);
-        var publicSuffix2 = PublicSuffix(uri2);
+        var publicSuffix1 = PublicSuffix(url: uri1);
+        var publicSuffix2 = PublicSuffix(url: uri2);
 
         expect(DomainUtils.isSubdomainOf(uri1, uri2, icann: icann),
             equals(publicSuffix1.isSubdomainOf(publicSuffix2, icann: icann)));
@@ -91,7 +91,7 @@ void main() {
       void testValidDomain(String domain,
           {bool icann = false, bool defaultRule = true}) {
         var uri = Uri.parse(domain);
-        var publicSuffix1 = PublicSuffix(uri);
+        var publicSuffix1 = PublicSuffix(url: uri);
 
         expect(
             DomainUtils.hasValidDomain(uri,

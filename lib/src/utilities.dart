@@ -25,8 +25,8 @@ class DomainUtils {
   ///
   /// Throws a [StateError] if [SuffixRules] has not been initialised.
   static bool isSubdomainOf(Uri potentialSub, Uri root, {bool icann = false}) {
-    var parsedUrl = PublicSuffix(potentialSub);
-    var parsedRoot = PublicSuffix(root);
+    var parsedUrl = PublicSuffix(url: potentialSub);
+    var parsedRoot = PublicSuffix(url: root);
 
     return parsedUrl.isSubdomainOf(parsedRoot, icann: icann);
   }
@@ -41,9 +41,9 @@ class DomainUtils {
   /// Throws a [StateError] if [SuffixRules] has not been initialised.
   static bool isSubdomain(Uri potentialSub, {bool icann = false}) {
     if (icann) {
-      return PublicSuffix(potentialSub).icannSubdomain != null;
+      return PublicSuffix(url: potentialSub).icannSubdomain != null;
     } else {
-      return PublicSuffix(potentialSub).subdomain != null;
+      return PublicSuffix(url: potentialSub).subdomain != null;
     }
   }
 
@@ -83,7 +83,7 @@ class DomainUtils {
   /// Throws a [StateError] if [SuffixRules] has not been initialised.
   static bool hasValidDomain(Uri domain,
       {bool icann = false, bool acceptDefaultRule = true}) {
-    return PublicSuffix(domain)
+    return PublicSuffix(url: domain)
         .hasValidDomain(icann: icann, acceptDefaultRule: acceptDefaultRule);
   }
 }

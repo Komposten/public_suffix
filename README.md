@@ -122,5 +122,17 @@ Several utility functions can be found in the `DomainUtils` class (imported from
 
 Most of these create PublicSuffix objects internally. If you are already working with PublicSuffix objects, there are similar methods you can call directly on those to avoid creating new ones.
 
+## Contributing
+### Git message conventions
+public_suffix uses [gitmoji](https://gitmoji.carloscuesta.me) to indicate commit types (bug fix, new feature, re-factor, etc.)
+
+Commit messages should generally follow this format:
+```
+:emoji: Write a short summary on line one
+
+Put additional information two lines down.
+Use imperative forms of verbs. For example "Add", "Fix" and "Move" instead of "Added", "Fixed" and "Moved".
+```
+
 ## License
 public_suffix is licensed under the MIT license. See [LICENSE](https://github.com/Komposten/public_suffix/blob/master/LICENSE) for the full license text.

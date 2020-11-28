@@ -4,30 +4,55 @@ import 'package:public_suffix/browser_helper.dart';
 import 'package:test/test.dart';
 
 void main() {
-  tearDown(() => SuffixRules.dispose());
+  tearDown(() => DefaultSuffixRules.dispose());
 
-  test('initPublicSuffixList_crossDomainUrl_initList', () async {
-    await SuffixRulesHelper.initFromUri(Uri.parse(
-        'https://raw.githubusercontent.com/Komposten/public_suffix/master/test/res/public_suffix_list.dat'));
-    expect(SuffixRules.hasInitialised(), isTrue);
-    expect(SuffixRules.rules, isNotEmpty);
+  group('initDefaultListFromUri_', () {
+    test('crossDomainUrl_initList', () async {
+      await SuffixRulesHelper.initDefaultListFromUri(Uri.parse(
+          'https://raw.githubusercontent.com/Komposten/public_suffix/master/test/res/public_suffix_list.dat'));
+      expect(DefaultSuffixRules.hasInitialised(), isTrue);
+      expect(DefaultSuffixRules.rules.rules, isNotEmpty);
+    });
+
+    test('resourceDoesNotExist_fail', () async {
+      var uri = Uri.parse(
+          "https://raw.githubusercontent.com/Komposten/public_suffix/master/test/res/i_dont_exist.dat");
+      expect(SuffixRulesHelper.initDefaultListFromUri(uri), throwsException);
+    });
+
+    test('fileAccessDenied_fail', () async {
+      var file = Uri.file("/public_suffix_list.dat");
+
+      expect(SuffixRulesHelper.initDefaultListFromUri(file), throwsException);
+    });
+
+    test('invalidUrl_throwException', () async {
+      expect(SuffixRulesHelper.initDefaultListFromUri(Uri.parse('127.0.0.2/list.dat')),
+          throwsException);
+    });
   });
 
-  test('initPublicSuffixList_resourceDoesNotExist_fail', () async {
-    var uri = Uri.parse(
-        "https://raw.githubusercontent.com/Komposten/public_suffix/master/test/res/i_dont_exist.dat");
-    expect(SuffixRulesHelper.initFromUri(uri), throwsException);
-  });
+  group('createListFromUri', () {
+    test('crossDomainUrl_initList', () async {
+      var rules = await SuffixRulesHelper.createListFromUri(Uri.parse(
+          'https://raw.githubusercontent.com/Komposten/public_suffix/master/test/res/public_suffix_list.dat'));
+      expect(rules.rules, isNotEmpty);
+    });
 
-  test('initPublicSuffixList_fileAccessDenied_fail', () async {
-    var file = Uri.file("/public_suffix_list.dat");
+    test('resourceDoesNotExist_fail', () async {
+      var uri = Uri.parse(
+          "https://raw.githubusercontent.com/Komposten/public_suffix/master/test/res/i_dont_exist.dat");
+      expect(SuffixRulesHelper.createListFromUri(uri), throwsException);
+    });
 
-    expect(SuffixRulesHelper.initFromUri(file), throwsException);
-  });
+    test('fileAccessDenied_fail', () async {
+      var file = Uri.file("/public_suffix_list.dat");
+      expect(SuffixRulesHelper.createListFromUri(file), throwsException);
+    });
 
-  test('initPublicSuffixList_invalidUrl_throwException', () async {
-    expect(SuffixRulesHelper.initFromUri(Uri.parse('127.0.0.2/list.dat')),
-        throwsException);
-    expect(SuffixRules.hasInitialised(), isFalse);
+    test('invalidUrl_throwException', () async {
+      expect(SuffixRulesHelper.createListFromUri(Uri.parse('127.0.0.2/list.dat')),
+          throwsException);
+    });
   });
 }

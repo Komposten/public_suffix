@@ -6,22 +6,41 @@ import 'package:test/test.dart';
 import 'io_test_utils.dart';
 
 void main() {
-  test('PublicSuffix_PublicSuffixListNotInitialised_throwStateError', () {
+  test('PublicSuffix_defaultListNotInitialised_throwStateError', () {
     expect(
         () => PublicSuffix(Uri.parse('http://www.pub.dev')), throwsStateError);
     expect(
         () => PublicSuffix.fromString('http://www.pub.dev'), throwsStateError);
   });
 
+  test('PublicSuffix_defaultListInitialised_success', () {
+    DefaultSuffixRules.initFromString('*.dev');
+    expect(
+        () => PublicSuffix(Uri.parse('http://www.pub.dev')), returnsNormally);
+    expect(
+        () => PublicSuffix.fromString('http://www.pub.dev'), returnsNormally);
+    DefaultSuffixRules.dispose();
+  });
+
+  test('PublicSuffix_rulesListProvided_success', () {
+    var rules = SuffixRules.fromString('*.dev');
+    expect(
+        () => PublicSuffix(Uri.parse('http://www.pub.dev'), suffixRules: rules),
+        returnsNormally);
+    expect(
+        () => PublicSuffix.fromString('http://www.pub.dev', suffixRules: rules),
+        returnsNormally);
+  });
+
   test('PublicSuffix_uriWithoutAuthority_throwArgumentError', () async {
-    SuffixRules.initFromString("");
+    DefaultSuffixRules.initFromString('');
     expect(() => PublicSuffix(Uri.parse('www.pub.dev')), throwsArgumentError);
     expect(() => PublicSuffix.fromString('www.pub.dev'), throwsArgumentError);
   });
 
   group('PublicSuffix_', () {
     setUpAll(() async {
-      await SuffixRulesHelper.initFromUri(getSuffixListFileUri());
+      await SuffixRulesHelper.initDefaultListFromUri(getSuffixListFileUri());
     });
 
     void testPublicSuffix(String url, String expectedRoot, String expectedTld) {
@@ -209,12 +228,12 @@ void main() {
       expect(suffix.punyDecoded.suffix, equals('co.uk'));
     });
 
-    tearDownAll(() => SuffixRules.dispose());
+    tearDownAll(() => DefaultSuffixRules.dispose());
   });
 
   group('PublicSuffixFromString_', () {
     setUpAll(() async {
-      await SuffixRulesHelper.initFromUri(getSuffixListFileUri());
+      await SuffixRulesHelper.initDefaultListFromUri(getSuffixListFileUri());
     });
 
     test('normalUrls_parseCorrectly', () {
@@ -230,7 +249,7 @@ void main() {
 
   group('isPrivateSuffix_', () {
     setUpAll(() async {
-      await SuffixRulesHelper.initFromUri(getSuffixListFileUri());
+      await SuffixRulesHelper.initDefaultListFromUri(getSuffixListFileUri());
     });
 
     test('hasMatchedPrivateRule_true', () {
@@ -243,12 +262,12 @@ void main() {
       expect(suffix.isPrivateSuffix(), isFalse);
     });
 
-    tearDownAll(() => SuffixRules.dispose());
+    tearDownAll(() => DefaultSuffixRules.dispose());
   });
 
   group('isSubdomainOf_', () {
     setUpAll(() async {
-      await SuffixRulesHelper.initFromUri(getSuffixListFileUri());
+      await SuffixRulesHelper.initDefaultListFromUri(getSuffixListFileUri());
     });
 
     test('subdomainOfRoot_true', () {
@@ -315,12 +334,12 @@ void main() {
           isTrue);
     });
 
-    tearDownAll(() => SuffixRules.dispose());
+    tearDownAll(() => DefaultSuffixRules.dispose());
   });
 
   group('hasKnownSuffix_', () {
     setUpAll(() async {
-      await SuffixRulesHelper.initFromUri(getSuffixListFileUri());
+      await SuffixRulesHelper.initDefaultListFromUri(getSuffixListFileUri());
     });
 
     test('knownSuffixes_true', () {
@@ -346,12 +365,12 @@ void main() {
           isFalse);
     });
 
-    tearDownAll(() => SuffixRules.dispose());
+    tearDownAll(() => DefaultSuffixRules.dispose());
   });
 
   group('hasValidDomain_', () {
     setUpAll(() async {
-      await SuffixRulesHelper.initFromUri(getSuffixListFileUri());
+      await SuffixRulesHelper.initDefaultListFromUri(getSuffixListFileUri());
     });
 
     test('validDomains_true', () {
@@ -387,6 +406,6 @@ void main() {
           isFalse);
     });
 
-    tearDownAll(() => SuffixRules.dispose());
+    tearDownAll(() => DefaultSuffixRules.dispose());
   });
 }

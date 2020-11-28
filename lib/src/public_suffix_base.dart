@@ -8,6 +8,7 @@
  * of this project.
  */
 
+import 'package:public_suffix/public_suffix.dart';
 import 'package:punycode/punycode.dart';
 
 import 'suffix_rules.dart';
@@ -144,27 +145,36 @@ class PublicSuffix {
 
   /// Creates a new instance based on the specified [sourceUrl].
   ///
-  /// Throws a [StateError] if [SuffixRules] has not been initialised.
+  /// [suffixRules] can be used to specify the rules to be used when
+  /// parsing the URL. If not specified, [DefaultSuffixRules.rules] will
+  /// be used.
+  ///
+  /// Throws a [StateError] if [suffixRules] is null and [DefaultSuffixRules]
+  /// has not been initialised.
   ///
   /// Throws an [ArgumentError] if [sourceUrl] is missing the authority component
   /// (e.g. if no protocol is specified).
-  PublicSuffix(this.sourceUrl) {
-    if (!SuffixRules.hasInitialised()) {
-      throw StateError('PublicSuffixList has not been initialised!');
-    }
+  PublicSuffix(this.sourceUrl, {SuffixRules suffixRules}) {
+    suffixRules ??= DefaultSuffixRules.rulesOrThrow();
+
     if (!sourceUrl.hasAuthority) {
       throw ArgumentError(
           "The URL is missing the authority component: $sourceUrl");
     }
 
-    _parseUrl(sourceUrl, SuffixRules.ruleMap);
+    _parseUrl(sourceUrl, suffixRules.ruleMap);
   }
 
   /// Creates a new instance from a URL in a string.
   ///
   /// This is a convenience method that simply converts [url] into a URI object
   /// and creates an instance from it.
-  PublicSuffix.fromString(String url) : this(Uri.parse(url));
+  ///
+  /// [suffixRules] can be used to specify the rules to be used when
+  /// parsing the URL. If not specified, [DefaultSuffixRules.rules] will
+  /// be used.
+  PublicSuffix.fromString(String url, {SuffixRules suffixRules})
+      : this(Uri.parse(url), suffixRules: suffixRules);
 
   void _parseUrl(Uri url, Map<String, Iterable<Rule>> suffixMap) {
     var host = _decodeHost(url);

@@ -8,11 +8,11 @@ import 'io_test_utils.dart';
 void main() {
   group('SuffixRules initialised', () {
     setUpAll(() async {
-      await SuffixRulesHelper.initFromUri(getSuffixListFileUri());
+      await SuffixRulesHelper.initDefaultListFromUri(getSuffixListFileUri());
     });
 
     tearDownAll(() {
-      SuffixRules.dispose();
+      DefaultSuffixRules.dispose();
     });
 
     group('isSubdomainOf_', () {

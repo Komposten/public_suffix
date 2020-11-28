@@ -15,19 +15,26 @@ public_suffix is a dart library for identifying the public suffixes (or TLDs), r
 - Check if URLs are subdomains, have valid domain parts, or end with known suffixes.
 
 ## Usage
+### Option 1 - Using a statically accessible list
 1) Import `public_suffix.dart`.
-2) [Initialise `SuffixRules`](#initialising-suffixrules) from a suffix rule list.
+2) [Initialise `DefaultSuffixRules`](#initialising-defaultsuffixrules) from a suffix rule list.
 3) Create instances of `PublicSuffix` to parse URLs.
 4) Access the different URL components through the `PublicSuffix` objects.
 
-### Short example
+### Option 2 - Using a non-static list
+1) Import `public_suffix.dart`.
+2) [Create a `SuffixRules` instance](#creating-suffixrules-instances) from a suffix rule list.
+3) Create instances of `PublicSuffix` to parse URLs, passing in the `SuffixRules` instance from step 2.
+4) Access the different URL components through the `PublicSuffix` objects.
+
+### Short example using the static list
 ```dart
 import 'package:public_suffix/public_suffix.dart';
 
 main() {
   // Load a list of suffix rules from publicsuffix.org.
   String suffixListString = 'load the list into this string';
-  SuffixRules.initFromString(suffixListString);
+  DefaultSuffixRules.initFromString(suffixListString);
 	  
   // Parse a URL.
   PublicSuffix parsedUrl =
@@ -45,11 +52,18 @@ main() {
   print(parsedUrl.punyDecoded.domain); // 你好.cn
 }
 ```
-
-### Initialising SuffixRules
+## Obtaining a suffix list
 public_suffix requires a list of suffix rules to work. There is no list bundled by default as these lists are updated frequently.
-Instead you'll have to load a list on your own and pass that list to `SuffixRules`. There are two ways of doing this:
-1) Load the list using your own code and pass it to `SuffixRules.initFromString()`:
+
+To use public_suffix you need to first load a list of rules, and then either initialise `DefaultSuffixRules` (for static access) or create
+your own instance of `SuffixRules`.
+
+### Initialising DefaultSuffixRules
+The easiest way to use public_suffix is to get a list of rules and pass that list to `DefaultSuffixRules`. The `PublicSuffix` class will use this
+list by default.
+
+There are two ways of initialising it:
+1) Load the list using your own code and pass it to `DefaultSuffixRules.initFromString()`:
    ```dart
    //Example using Flutter
    import 'package:flutter/services.dart';
@@ -57,17 +71,43 @@ Instead you'll have to load a list on your own and pass that list to `SuffixRule
    
    main() {
        var suffixList = rootBundle.loadString('assets/public_suffix_list.dat');
-       SuffixRules.initFromString(suffixList);
+       DefaultSuffixRules.initFromString(suffixList);
    }
    ```
 2) Import either the `dart:io` or the `dart:html`-based helper and load the list from a URI:
    ```dart
-   //Example using dart:io; for dart:html use public_suffix_browser.dart instead.
-   import 'package:public_suffix/public_suffix_io.dart';
+   //Example using dart:io; for dart:html use browser_helper.dart instead.
+   import 'package:public_suffix/io_helper.dart';
    
    main() async {
      Uri uri = Uri.parse('https://publicsuffix.org/list/public_suffix_list.dat');
-     await SuffixRulesHelper.initFromUri(listUri);
+     await SuffixRulesHelper.initDefaultListFromUri(listUri);
+   }
+   ```
+
+### Creating SuffixRules instances
+An alternative way to use public_suffix is to manually create an instance of `SuffixRules` and then pass that in when creating `PublicSuffix` objects.
+
+Just like before, there are two ways of doing this:
+1) Load the list using your own code and pass it to one of `SuffixRules` constructors:
+   ```dart
+   //Example using Flutter
+   import 'package:flutter/services.dart';
+   import 'package:public_suffix/public_suffix.dart';
+   
+   main() {
+       var suffixList = rootBundle.loadString('assets/public_suffix_list.dat');
+       var suffixRules = SuffixRules.fromString(suffixList);
+   }
+   ```
+2) Import either the `dart:io` or the `dart:html`-based helper and load the list from a URI:
+   ```dart
+   //Example using dart:io; for dart:html use browser_helper.dart instead.
+   import 'package:public_suffix/io_helper.dart';
+   
+   main() async {
+     Uri uri = Uri.parse('https://publicsuffix.org/list/public_suffix_list.dat');
+     var suffixRules = await SuffixRulesHelper.createListFromUri(listUri);
    }
    ```
 

@@ -1,3 +1,7 @@
+## 2.0.1
+### Additions
+- Add [example/example.md](example/example.md) to make the new examples show up on pub.dev. 
+
 ## 2.0.0
 ### API changes
 - `SuffixRules` is no longer static.

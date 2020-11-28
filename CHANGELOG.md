@@ -1,11 +1,25 @@
 ## 2.0.0
 ### API changes
+- `SuffixRules` is no longer static.
+    - Multiple instances can be created with different rule lists.
+    - `DefaultSuffixRules` has been added to provide a statically accessible rules list with a similar API to the old `SuffixRules`.
+    - `PublicSuffix` now takes an optional argument when created to specify the `SuffixRules` to use. If unspecified, `DefaultSuffixRules` is used (similar to previous version). 
+- Move `SuffixRules.process` and `SuffixRules.validate` to a new class, `SuffixRulesParser`.
+- The default constructor in `PublicSuffix` now takes either a String or a URL.
+- Add factory methods `PublicSuffix.fromString` and fromUrl with adjustable leniency for invalid URLs ([fixes #4](https://github.com/Komposten/public_suffix/issues/4)).
+    - These allow creation of `PublicSuffix` instances without getting exceptions thrown if the URL is null/empty/invalid. See the documentation for full details.
+- Rename `PublicSuffix.sourceUri` to `PublicSuffix.sourceUrl`.
 - Remove export of `public_suffix.dart` from the helper files.
 - Rename `public_suffix_io.dart` and `public_suffix_browser.dart` to `io_helper.dart` and `browser_helper.dart`.
-- Rename `PublicSuffix.sourceUri` to `PublicSuffix.sourceUrl`.
+
+### Additions
+- `END PRIVATE` is now respected when loading a suffix list. This means that a list can contain the private section anywhere in the list or even have multiple private sections.
+- `SuffixRules.hasRules` - checks if at least one rule exists.
+- `SuffixRules.fromRules` - creates a `SuffixRules` instance from an existing list of `Rule` objects.
 
 ### Fixes
 - Fix rule matching not working for rules with wildcards not in the first position (e.g. `a.*.c`).
+- Allow null lists when creating `SuffixRules` objects (treated as empty lists).
 
 ## 1.2.1
 - Improved the suffix list format documentation in `SuffixRules` and the `SuffixRulesHelper`s.

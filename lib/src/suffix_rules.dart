@@ -15,8 +15,8 @@ import 'package:public_suffix/src/suffix_rules_parser.dart';
 /// Rules are parsed from either a string or a list and can
 /// then be accessed using [rules] or [ruleMap].
 class SuffixRules {
-  List<Rule> _rules;
-  Map<String, Iterable<Rule>> _ruleMap;
+  late List<Rule> _rules;
+  late Map<String, Iterable<Rule>> _ruleMap;
 
   /// Returns an unmodifiable list containing the current rules in the original order.
   List<Rule> get rules => List.unmodifiable(_rules);
@@ -37,7 +37,7 @@ class SuffixRules {
   /// [publicsuffix.org](https://publicsuffix.org/list/public_suffix_list.dat).
   /// This includes the `BEGIN PRIVATE` and `END PRIVATE` tags/comments,
   /// which are used by [process] to separate ICANN/IANA rules from private rules.
-  SuffixRules.fromString(String rules)
+  SuffixRules.fromString(String? rules)
       : this.fromList(rules?.split(RegExp(r'[\r\n]+')));
 
   /// Creates a new rule list from a list of rule strings.
@@ -48,7 +48,7 @@ class SuffixRules {
   /// from private rules.
   /// See [publicsuffix.org](https://publicsuffix.org/list/public_suffix_list.dat)
   /// for the rule format.
-  SuffixRules.fromList(List<String> rules) {
+  SuffixRules.fromList(List<String>? rules) {
     rules ??= [];
     var parser = SuffixRulesParser();
     var processed = parser.process(rules);
@@ -61,7 +61,7 @@ class SuffixRules {
   /// [rules] will be validated using a [SuffixRulesParser]
   /// and a [FormatException] will be thrown if one or more
   /// rules are invalid.
-  SuffixRules.fromRules(List<Rule> rules) {
+  SuffixRules.fromRules(List<Rule>? rules) {
     rules ??= [];
     var parser = SuffixRulesParser();
     parser.validate(rules);
@@ -78,7 +78,7 @@ class SuffixRules {
     for (var rule in rules) {
       var lastLabel = rule.labels.substring(rule.labels.lastIndexOf('.') + 1);
       if (map.containsKey(lastLabel)) {
-        map[lastLabel].add(rule);
+        map[lastLabel]!.add(rule);
       } else {
         var list = <Rule>[rule];
         map[lastLabel] = list;
@@ -102,7 +102,7 @@ class Rule {
   /// If the rule is an ICANN/IANA rule.
   final bool isIcann;
 
-  List<String> _parts;
+  late List<String> _parts;
 
   Rule(String rule, {this.isIcann = true})
       : isException = rule.startsWith('!'),
@@ -137,7 +137,7 @@ class Rule {
   int get hashCode {
     var result = 1;
 
-    result = 31 * result + (labels != null ? labels.hashCode : 0);
+    result = 31 * result + labels.hashCode;
     result = 31 * result + (isException ? 1231 : 1237);
     result = 31 * result + (isIcann ? 1231 : 1237);
 
@@ -152,7 +152,7 @@ class Rule {
       return false;
     }
 
-    Rule otherRule = other;
+    var otherRule = other;
     if (labels != otherRule.labels) {
       return false;
     } else if (isException != otherRule.isException) {

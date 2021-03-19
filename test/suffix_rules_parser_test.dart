@@ -2,7 +2,7 @@ import 'package:public_suffix/public_suffix.dart';
 import 'package:test/test.dart';
 
 void main() {
-  var parser;
+  late var parser;
 
   setUp(() {
     parser = SuffixRulesParser();

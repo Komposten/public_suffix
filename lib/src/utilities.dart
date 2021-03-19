@@ -56,14 +56,14 @@ class DomainUtils {
   ///
   /// Throws a [StateError] if [suffixRules] is null and
   /// [DefaultSuffixRules] has not been initialised.
-  static bool isKnownSuffix(String suffix, {SuffixRules suffixRules}) {
+  static bool isKnownSuffix(String suffix, {SuffixRules? suffixRules}) {
     suffixRules ??= DefaultSuffixRules.rulesOrThrow();
 
     var split = suffix.split('.');
-    var rules = suffixRules.ruleMap[split.last] ?? <String>[];
+    var rules = suffixRules!.ruleMap[split.last] ?? <String>[];
     var isKnown = false;
 
-    for (var rule in rules) {
+    for (var rule in rules as Iterable<dynamic>) {
       if (rule.labels.split('.').length == split.length &&
           rule.matches(suffix)) {
         isKnown = true;

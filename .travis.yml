@@ -5,7 +5,7 @@ branches:
     - /^(?i:release)-.+$/
 dart:
   - stable
-  - "2.2.0"
+  - "2.12.0"
 dart_task:
   - test: --platform vm
   - test: --platform chrome

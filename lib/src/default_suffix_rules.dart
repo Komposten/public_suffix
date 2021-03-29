@@ -24,9 +24,9 @@ class DefaultSuffixRules {
 
   /// Returns the default suffix rules or throws if they haven't
   /// been initialised.
-  static SuffixRules? rulesOrThrow() {
+  static SuffixRules rulesOrThrow() {
     if (hasInitialised()) {
-      return rules;
+      return rules!;
     } else {
       throw StateError('PublicSuffixList has not been initialised!');
     }

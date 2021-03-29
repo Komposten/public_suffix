@@ -208,12 +208,12 @@ void main() {
       expect(suffix.icannRoot, equals('github'));
       expect(suffix.icannSuffix, equals('io'));
       expect(suffix.icannSubdomain, equals('sub.komposten'));
-      expect(suffix.punyDecoded!.root, equals('komposten'));
-      expect(suffix.punyDecoded!.suffix, equals('github.io'));
-      expect(suffix.punyDecoded!.subdomain, equals('sub'));
-      expect(suffix.punyDecoded!.icannRoot, equals('github'));
-      expect(suffix.punyDecoded!.icannSuffix, equals('io'));
-      expect(suffix.punyDecoded!.icannSubdomain, equals('sub.komposten'));
+      expect(suffix.punyDecoded.root, equals('komposten'));
+      expect(suffix.punyDecoded.suffix, equals('github.io'));
+      expect(suffix.punyDecoded.subdomain, equals('sub'));
+      expect(suffix.punyDecoded.icannRoot, equals('github'));
+      expect(suffix.punyDecoded.icannSuffix, equals('io'));
+      expect(suffix.punyDecoded.icannSubdomain, equals('sub.komposten'));
     });
 
     test('punycodedUrl_punydecodedInstanceHasDecodedData', () {
@@ -222,17 +222,17 @@ void main() {
       expect(suffix.suffix, equals('xn--55qx5d.cn'));
       expect(suffix.root, equals('xn--85x722f'));
       expect(suffix.subdomain, equals('xn--6qq79v'));
-      expect(suffix.punyDecoded!.suffix, equals('公司.cn'));
-      expect(suffix.punyDecoded!.root, equals('食狮'));
-      expect(suffix.punyDecoded!.subdomain, equals('你好'));
+      expect(suffix.punyDecoded.suffix, equals('公司.cn'));
+      expect(suffix.punyDecoded.root, equals('食狮'));
+      expect(suffix.punyDecoded.subdomain, equals('你好'));
     });
 
     test('notPunycodedUrl_punydecodedInstanceHasSameData', () {
       var suffix = PublicSuffix(urlString: 'http://google.co.uk');
       expect(suffix.root, equals('google'));
       expect(suffix.suffix, equals('co.uk'));
-      expect(suffix.punyDecoded!.root, equals('google'));
-      expect(suffix.punyDecoded!.suffix, equals('co.uk'));
+      expect(suffix.punyDecoded.root, equals('google'));
+      expect(suffix.punyDecoded.suffix, equals('co.uk'));
     });
 
     tearDownAll(() => DefaultSuffixRules.dispose());

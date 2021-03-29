@@ -60,10 +60,10 @@ class DomainUtils {
     suffixRules ??= DefaultSuffixRules.rulesOrThrow();
 
     var split = suffix.split('.');
-    var rules = suffixRules!.ruleMap[split.last] ?? <String>[];
+    var rules = suffixRules.ruleMap[split.last] ?? [];
     var isKnown = false;
 
-    for (var rule in rules as Iterable<dynamic>) {
+    for (var rule in rules) {
       if (rule.labels.split('.').length == split.length &&
           rule.matches(suffix)) {
         isKnown = true;

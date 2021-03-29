@@ -15,22 +15,23 @@ import 'suffix_rules.dart';
 
 /// A description of the public suffix, root domain and registrable domain for a URL.
 class PublicSuffix {
-  Uri? _sourceUrl;
+  late final Uri _sourceUrl;
 
   bool _sourcePunycoded = false;
-  bool? _hasKnownSuffix;
-  String? _root;
-  String? _suffix;
+  late final bool _hasKnownSuffix;
+  late final String _root;
+  late final String _suffix;
   String? _domain;
   String? _subdomain;
-  String? _icannRoot;
-  String? _icannSuffix;
+
+  late final String _icannRoot;
+  late final String _icannSuffix;
   String? _icannDomain;
   String? _icannSubdomain;
 
-  PublicSuffix? _punyDecoded;
+  late final PublicSuffix _punyDecoded;
 
-  Uri? get sourceUrl => _sourceUrl;
+  Uri get sourceUrl => _sourceUrl;
 
   /// Returns the registrable domain part of the URL, based on both ICANN/IANA and private rules.
   ///
@@ -49,14 +50,14 @@ class PublicSuffix {
   ///
   /// The root domain is the label that precedes the public suffix.
   /// For example, `images.google.co.uk` has the root domain `google`.
-  String? get root => _root;
+  String get root => _root;
 
   /// Returns the public suffix part of the URL, based on both ICANN/IANA and private rules.
   ///
   /// The public suffix is the labels at the end of the URL which are not controlled
   /// by the registrant of the domain.
   /// For example, `images.google.co.uk` has the public suffix `co.uk`.
-  String? get suffix => _suffix;
+  String get suffix => _suffix;
 
   /// Returns the registrable domain part of the URL, based on ICANN/IANA rules.
   ///
@@ -75,17 +76,17 @@ class PublicSuffix {
   ///
   /// The root domain is the label that precedes the public suffix.
   /// For example, `images.google.co.uk` has the root domain `google`.
-  String? get icannRoot => _icannRoot;
+  String get icannRoot => _icannRoot;
 
   /// Returns the public suffix part of the URL, based on ICANN/IANA rules.
   ///
   /// The public suffix is the labels at the end of the URL which are not controlled
   /// by the registrant of the domain.
   /// For example, `images.google.co.uk` has the public suffix `co.uk`.
-  String? get icannSuffix => _icannSuffix;
+  String get icannSuffix => _icannSuffix;
 
   /// Returns a punycode decoded version of this object.
-  PublicSuffix? get punyDecoded => _punyDecoded;
+  PublicSuffix get punyDecoded => _punyDecoded;
 
   /// Checks if the URL was matched with a private rule rather than an ICANN/IANA rule.
   ///
@@ -96,7 +97,7 @@ class PublicSuffix {
   /// Whether the [suffix] is a known suffix or not.
   ///
   /// A known suffix is one which has a rule in the suffix rule list.
-  bool? hasKnownSuffix() => _hasKnownSuffix;
+  bool hasKnownSuffix() => _hasKnownSuffix;
 
   /// Checks if the registrable domain is valid.
   ///
@@ -107,7 +108,7 @@ class PublicSuffix {
   bool hasValidDomain({bool icann = false, bool acceptDefaultRule = true}) {
     var _domain = (icann ? icannDomain : domain);
 
-    if (acceptDefaultRule || hasKnownSuffix()!) {
+    if (acceptDefaultRule || hasKnownSuffix()) {
       return _domain != null;
     } else {
       return false;
@@ -209,11 +210,15 @@ class PublicSuffix {
   }
 
   PublicSuffix._(this._sourceUrl, String host, this._root, this._suffix,
-      this._icannRoot, this._icannSuffix) {
-    _domain = _buildRegistrableDomain(_root!, _suffix);
-    _icannDomain = _buildRegistrableDomain(_icannRoot!, _icannSuffix);
+      this._icannRoot, this._icannSuffix,
+      {required bool hasKnownSuffix})
+      : _hasKnownSuffix = hasKnownSuffix {
+    _domain = _buildRegistrableDomain(_root, _suffix);
+    _icannDomain = _buildRegistrableDomain(_icannRoot, _icannSuffix);
     _subdomain = _getSubdomain(host, _domain);
     _icannSubdomain = _getSubdomain(host, _icannDomain);
+
+    _punyDecoded = this;
   }
 
   /// Creates a new instance from a URL.
@@ -235,13 +240,13 @@ class PublicSuffix {
     }
 
     _sourceUrl = url ?? Uri.parse(urlString!);
-    if (!sourceUrl!.hasAuthority) {
+    if (!sourceUrl.hasAuthority) {
       throw ArgumentError(
           'The URL is missing the authority component: $sourceUrl');
     }
 
     suffixRules ??= DefaultSuffixRules.rulesOrThrow();
-    _parseUrl(sourceUrl!, suffixRules!.ruleMap);
+    _parseUrl(sourceUrl, suffixRules.ruleMap);
   }
 
   void _parseUrl(Uri url, Map<String, Iterable<Rule>> suffixMap) {
@@ -275,7 +280,8 @@ class PublicSuffix {
     var icannPuny = icannData['puny'];
 
     _punyDecoded = PublicSuffix._(sourceUrl, host, puny['root'], puny['suffix'],
-        icannPuny['root'], icannPuny['suffix']);
+        icannPuny['root'], icannPuny['suffix'],
+        hasKnownSuffix: _hasKnownSuffix);
   }
 
   String _decodeHost(Uri url) {
@@ -416,7 +422,7 @@ class PublicSuffix {
     return (root.isNotEmpty ? '$root.$suffix' : null);
   }
 
-  String? _getSubdomain(String host, String? registrableDomain) {
+  String _getSubdomain(String host, String? registrableDomain) {
     var sub;
 
     if (registrableDomain != null) {

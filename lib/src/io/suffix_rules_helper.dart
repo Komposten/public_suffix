@@ -69,7 +69,6 @@ class SuffixRulesHelper {
     switch (response.statusCode) {
       case 200:
         return await response.transform(Utf8Decoder()).join();
-        break;
       default:
         throw Exception(
             'Request for public suffix list failed: [${response.statusCode}]');

@@ -1,17 +1,17 @@
 name: public_suffix
 description: A domain parser based on the Public Suffix List, for identifying the root and suffix/TLD of URLs.
-version: 2.0.1
+version: 3.0.0
 homepage: https://www.github.com/komposten/
 repository: https://www.github.com/komposten/public_suffix
 issue_tracker: https://www.github.com/komposten/public_suffix/issues
 
 environment:
-  sdk: '>=2.2.0 <3.0.0'
+  sdk: '>=2.12.0 <3.0.0'
 
 dependencies:
-  punycode: ^0.1.0
+  punycode: ^1.0.0
 
 dev_dependencies:
   pedantic: ^1.7.0
   test: ^1.6.10
-  http_multi_server: ^2.2.0 # Here because test uses an earlier version that doesn't compile
+  http_multi_server: ^3.0.0 # Here because test uses an earlier version that doesn't compile

@@ -29,10 +29,10 @@ class SuffixRulesHelper {
   ///
   /// An [Exception] is thrown if the request fails.
   static Future<void> initDefaultListFromUri(Uri uri,
-      {bool withCredentials,
-      Map<String, String> requestHeaders,
+      {bool? withCredentials,
+      Map<String, String>? requestHeaders,
       dynamic sendData,
-      void Function(ProgressEvent) onProgress}) async {
+      void Function(ProgressEvent)? onProgress}) async {
     DefaultSuffixRules.initFromString(await _getUri(uri,
         withCredentials: withCredentials,
         requestHeaders: requestHeaders,
@@ -51,10 +51,10 @@ class SuffixRulesHelper {
   ///
   /// An [Exception] is thrown if the request fails.
   static Future<SuffixRules> createListFromUri(Uri uri,
-      {bool withCredentials,
-      Map<String, String> requestHeaders,
+      {bool? withCredentials,
+      Map<String, String>? requestHeaders,
       dynamic sendData,
-      void Function(ProgressEvent) onProgress}) async {
+      void Function(ProgressEvent)? onProgress}) async {
     return SuffixRules.fromString(await _getUri(uri,
         withCredentials: withCredentials,
         requestHeaders: requestHeaders,
@@ -62,11 +62,11 @@ class SuffixRulesHelper {
         onProgress: onProgress));
   }
 
-  static Future<String> _getUri(Uri uri,
-      {bool withCredentials,
-      Map<String, String> requestHeaders,
+  static Future<String?> _getUri(Uri uri,
+      {bool? withCredentials,
+      Map<String, String>? requestHeaders,
       dynamic sendData,
-      void Function(ProgressEvent) onProgress}) async {
+      void Function(ProgressEvent)? onProgress}) async {
     try {
       var request = await HttpRequest.request(uri.toString(),
           withCredentials: withCredentials,
@@ -77,7 +77,6 @@ class SuffixRulesHelper {
       switch (request.status) {
         case 200:
           return request.responseText;
-          break;
         default:
           throw request;
       }
@@ -85,7 +84,7 @@ class SuffixRulesHelper {
       var object = e;
 
       if (e is ProgressEvent) {
-        object = e.target;
+        throw Exception('Request for public suffix list failed: ${e.target}');
       }
 
       if (object is HttpRequest) {

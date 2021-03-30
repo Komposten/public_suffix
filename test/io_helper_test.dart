@@ -13,7 +13,7 @@ void main() {
       await SuffixRulesHelper.initDefaultListFromUri(Uri.parse(
           'https://raw.githubusercontent.com/Komposten/public_suffix/master/test/res/public_suffix_list.dat'));
       expect(DefaultSuffixRules.hasInitialised(), isTrue);
-      expect(DefaultSuffixRules.rules.rules, isNotEmpty);
+      expect(DefaultSuffixRules.rules!.rules, isNotEmpty);
     });
 
     test('resourceDoesNotExist_fail', () async {
@@ -32,7 +32,7 @@ void main() {
     test('validFileUri_initList', () async {
       await SuffixRulesHelper.initDefaultListFromUri(getSuffixListFileUri());
       expect(DefaultSuffixRules.hasInitialised(), isTrue);
-      expect(DefaultSuffixRules.rules.rules, isNotEmpty);
+      expect(DefaultSuffixRules.rules!.rules, isNotEmpty);
     });
   });
 

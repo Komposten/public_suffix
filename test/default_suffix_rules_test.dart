@@ -24,8 +24,8 @@ void main() {
   test('afterInitialising_hasSuffixList', () {
     DefaultSuffixRules.initFromList(['br', 'nom.br']);
     expect(DefaultSuffixRules.rules, isNotNull);
-    expect(DefaultSuffixRules.rules.rules, hasLength(2));
-    expect(DefaultSuffixRules.rules.rules,
+    expect(DefaultSuffixRules.rules!.rules, hasLength(2));
+    expect(DefaultSuffixRules.rules!.rules,
         containsAllInOrder([Rule('br'), Rule('nom.br')]));
   });
 

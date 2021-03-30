@@ -15,18 +15,18 @@ import 'package:public_suffix/public_suffix.dart';
 ///
 /// After initialisation the rules can be accessed using [rules].
 class DefaultSuffixRules {
-  static SuffixRules _rules;
+  static SuffixRules? _rules;
 
   /// Returns the default suffix rules.
   ///
   /// [null] is returned if the list has not been initialised.
-  static SuffixRules get rules => _rules;
+  static SuffixRules? get rules => _rules;
 
   /// Returns the default suffix rules or throws if they haven't
   /// been initialised.
   static SuffixRules rulesOrThrow() {
     if (hasInitialised()) {
-      return rules;
+      return rules!;
     } else {
       throw StateError('PublicSuffixList has not been initialised!');
     }
@@ -40,7 +40,7 @@ class DefaultSuffixRules {
   /// Initialises the default rule list from a multi-rule string.
   ///
   /// See [SuffixRules.fromString] for details.
-  static void initFromString(String rules) {
+  static void initFromString(String? rules) {
     _rules = SuffixRules.fromString(rules);
   }
 

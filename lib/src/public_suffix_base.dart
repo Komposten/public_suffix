@@ -422,7 +422,7 @@ class PublicSuffix {
     return (root.isNotEmpty ? '$root.$suffix' : null);
   }
 
-  String _getSubdomain(String host, String? registrableDomain) {
+  String? _getSubdomain(String host, String? registrableDomain) {
     var sub;
 
     if (registrableDomain != null) {

@@ -11,7 +11,7 @@ Future<void> main() async {
 
   // Parse a URL.
   // If we don't specify a rule list, PublicSuffix uses DefaultSuffixRules.
-  var parsedUrl = PublicSuffix.fromString('https://www.komposten.github.io');
+  var parsedUrl = PublicSuffix(urlString: 'https://www.komposten.github.io');
 
   // Results when matching against both ICANN/IANA and private suffixes.
   print(parsedUrl.suffix); // github.io
@@ -24,7 +24,7 @@ Future<void> main() async {
   print(parsedUrl.icannDomain); // github.io
 
   // Punycode decoded results.
-  parsedUrl = PublicSuffix.fromString('https://www.xn--6qq79v.cn');
+  parsedUrl = PublicSuffix(urlString: 'https://www.xn--6qq79v.cn');
   print(parsedUrl.domain); // xn--6qq79v.cn
   print(parsedUrl.punyDecoded.domain); // 你好.cn
 

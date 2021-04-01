@@ -1,6 +1,7 @@
 # public_suffix
 [![pub package](https://img.shields.io/pub/v/public_suffix.svg)](https://pub.dev/packages/public_suffix)
-[![Build Status](https://travis-ci.com/Komposten/public_suffix.svg?branch=master)](https://travis-ci.com/Komposten/public_suffix)
+[![Dart CI](https://github.com/Komposten/public_suffix/actions/workflows/dart.yaml/badge.svg)](https://github.com/Komposten/public_suffix/actions/workflows/dart.yaml)
+[![codecov](https://codecov.io/gh/Komposten/public_suffix/branch/master/graph/badge.svg)](https://codecov.io/gh/Komposten/public_suffix)
 
 **A domain parser based on the [Public Suffix List](https://publicsuffix.org/)**
 
@@ -10,7 +11,7 @@ public_suffix is a dart library for identifying the public suffixes (or TLDs), r
 - Identify suffix, root domain, registrable domain (root + suffix) and subdomain from URLs.
 - Provide your own list of suffix rules to keep up to date with the rules you need.
 - Get results from matching with only ICANN/IANA rules or also include private ones.
-	- For example, a private rule can see the full `github.io` as suffix while ICANN only recognises the `io` part.
+    - For example, a private rule can see the full `github.io` as suffix while ICANN only recognises the `io` part.
 - Parse punycode encoded URLs and get both encoded and decoded results.
 - Check if URLs are subdomains, have valid domain parts, or end with known suffixes.
 
@@ -32,14 +33,13 @@ public_suffix is a dart library for identifying the public suffixes (or TLDs), r
 import 'package:public_suffix/public_suffix.dart';
 
 main() {
-  // Load a list of suffix rules from publicsuffix.org.
+  // Load a list of suffix rules.
   var suffixListString = 'load the list into this string';
   DefaultSuffixRules.initFromString(suffixListString);
-	  
+  
   // Parse a URL.
-  var parsedUrl =
-        PublicSuffix.fromString('https://www.komposten.github.io');
-	  
+  var parsedUrl = PublicSuffix(urlString: 'https://www.komposten.github.io');
+  
   // Obtain information using the many getters, for example:
   print(parsedUrl.suffix);      // github.io
   print(parsedUrl.root);        // komposten
@@ -47,7 +47,7 @@ main() {
   print(parsedUrl.icannDomain); // github.io
 
   // public_suffix also supports punycoded URLs:
-  parsedUrl = PublicSuffix.fromString('https://www.xn--6qq79v.cn');
+  parsedUrl = PublicSuffix(urlString: 'https://www.xn--6qq79v.cn');
   print(parsedUrl.domain);             // xn--6qq79v.cn
   print(parsedUrl.punyDecoded.domain); // 你好.cn
 }
@@ -112,7 +112,7 @@ Just like before, there are two ways of doing this:
    }
    ```
 
-**Note:** Don't overload publicsuffix.org's servers by repeatedly retrieving the suffix list from them. Cache a copy somewhere instead, and update that copy only when the master copy is updated.
+**Note:** Don't overload publicsuffix.org's servers by repeatedly retrieving the suffix list from them. Cache a copy somewhere instead, and update that copy when the master copy is updated.
 
 ## Utility functions
 Several utility functions can be found in the `DomainUtils` class (imported from `public_suffix.dart`). These currently include:

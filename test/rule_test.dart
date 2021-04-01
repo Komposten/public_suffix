@@ -66,11 +66,6 @@ void main() {
       expect(rule == rule, equals(true));
     });
 
-    test('compareWithNull_false', () {
-      var rule = Rule('ab.cd');
-      expect(rule == null, equals(false));
-    });
-
     test('otherClass_false', () {
       // ignore: unrelated_type_equality_checks
       expect(Rule('ab.cd') == 'ab.cd', equals(false));

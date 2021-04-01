@@ -34,9 +34,9 @@ class DomainUtils {
   /// Checks if a URL is a subdomain or a root domain.
   ///
   /// [potentialSub] is parsed to a [PublicSuffix] object. It is a subdomain if
-  /// the [subdomain] property of the object is [null].
+  /// the [PublicSuffix.subdomain] property of the object is `null`.
   ///
-  /// If [icann] is [true], [icannSubdomain] is checked instead.
+  /// If [icann] is `true`, [PublicSuffix.icannSubdomain] is checked instead.
   ///
   /// Throws a [StateError] if [SuffixRules] has not been initialised.
   static bool isSubdomain(Uri potentialSub, {bool icann = false}) {
@@ -56,11 +56,11 @@ class DomainUtils {
   ///
   /// Throws a [StateError] if [suffixRules] is null and
   /// [DefaultSuffixRules] has not been initialised.
-  static bool isKnownSuffix(String suffix, {SuffixRules suffixRules}) {
+  static bool isKnownSuffix(String suffix, {SuffixRules? suffixRules}) {
     suffixRules ??= DefaultSuffixRules.rulesOrThrow();
 
     var split = suffix.split('.');
-    var rules = suffixRules.ruleMap[split.last] ?? <String>[];
+    var rules = suffixRules.ruleMap[split.last] ?? [];
     var isKnown = false;
 
     for (var rule in rules) {
@@ -76,8 +76,8 @@ class DomainUtils {
 
   /// Checks if the URL contains a registrable domain part.
   ///
-  /// If [icann] is [true] the check will be based on only the ICANN/IANA rules.
-  /// If [acceptDefaultRule] is [false] URLs with suffixes only matching the
+  /// If [icann] is `true` the check will be based on only the ICANN/IANA rules.
+  /// If [acceptDefaultRule] is `false` URLs with suffixes only matching the
   /// default rule (`*`) will be seen as invalid.
   ///
   /// Throws a [StateError] if [SuffixRules] has not been initialised.

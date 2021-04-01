@@ -1,3 +1,11 @@
+## 3.0.0
+### API changes
+- Minimum Dart SDK requirement changed to 2.12.0.
+- All components have been updated for the new [null-safety](https://dart.dev/null-safety/understanding-null-safety) system (courtesy of [bsutton](https://github.com/bsutton)).
+
+### Fixes
+- Fix a couple of broken references in the API documentation. 
+
 ## 2.0.1
 ### Additions
 - Add [example/example.md](example/example.md) to make the new examples show up on pub.dev. 

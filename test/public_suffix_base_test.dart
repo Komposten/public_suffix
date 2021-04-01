@@ -252,11 +252,11 @@ void main() {
     });
 
     test('normalUrls_parseCorrectly', () {
-      var suffix = PublicSuffix.fromString('http://www.pub.dev');
+      var suffix = PublicSuffix.fromString('http://www.pub.dev')!;
       expect(suffix.suffix, equals('dev'));
       expect(suffix.root, equals('pub'));
 
-      suffix = PublicSuffix.fromString('http://www.komposten.github.io');
+      suffix = PublicSuffix.fromString('http://www.komposten.github.io')!;
       expect(suffix.suffix, equals('github.io'));
       expect(suffix.root, equals('komposten'));
     });
@@ -313,7 +313,7 @@ void main() {
 
     test('normalUrls_parseCorrectly', () {
       var suffix =
-          PublicSuffix.fromUrl(Uri.parse('http://www.komposten.github.io'));
+          PublicSuffix.fromUrl(Uri.parse('http://www.komposten.github.io'))!;
       expect(suffix.suffix, equals('github.io'));
       expect(suffix.root, equals('komposten'));
     });

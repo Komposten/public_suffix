@@ -6,7 +6,6 @@ on:
       - master
       - develop
       - release-*
-      - gh-actions
   pull_request:
     branches:
       - master

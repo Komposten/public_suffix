@@ -36,7 +36,7 @@ class SuffixRules {
   /// The list is expected to follow the same format as the list at
   /// [publicsuffix.org](https://publicsuffix.org/list/public_suffix_list.dat).
   /// This includes the `BEGIN PRIVATE` and `END PRIVATE` tags/comments,
-  /// which are used by [process] to separate ICANN/IANA rules from private rules.
+  /// which are used by [SuffixRulesParser.process] to separate ICANN/IANA rules from private rules.
   SuffixRules.fromString(String? rules)
       : this.fromList(rules?.split(RegExp(r'[\r\n]+')));
 
@@ -44,7 +44,7 @@ class SuffixRules {
   ///
   /// [rules] is expected to contain the contents of a suffix list with one rule
   /// or comment per element. This includes the `BEGIN PRIVATE` and `END PRIVATE`
-  /// tags/comments, which are used by [process] to separate ICANN/IANA rules
+  /// tags/comments, which are used by [SuffixRulesParser.process] to separate ICANN/IANA rules
   /// from private rules.
   /// See [publicsuffix.org](https://publicsuffix.org/list/public_suffix_list.dat)
   /// for the rule format.

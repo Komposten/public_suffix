@@ -90,7 +90,7 @@ class PublicSuffix {
 
   /// Checks if the URL was matched with a private rule rather than an ICANN/IANA rule.
   ///
-  /// If [true], then [root], [suffix] and [domain] will be different from the
+  /// If `true`, then [root], [suffix] and [domain] will be different from the
   /// `icann`-prefixed getters.
   bool isPrivateSuffix() => icannSuffix != _suffix;
 
@@ -101,9 +101,9 @@ class PublicSuffix {
 
   /// Checks if the registrable domain is valid.
   ///
-  /// If [icann] is [true] the check will be based on [icannDomain], otherwise
+  /// If [icann] is `true` the check will be based on [icannDomain], otherwise
   /// [domain] is used.
-  /// If [acceptDefaultRule] is [false] URLs with suffixes only matching the
+  /// If [acceptDefaultRule] is `false` URLs with suffixes only matching the
   /// default rule (`*`) will be seen as invalid.
   bool hasValidDomain({bool icann = false, bool acceptDefaultRule = true}) {
     var _domain = (icann ? icannDomain : domain);
@@ -118,13 +118,13 @@ class PublicSuffix {
   /// Checks if this object represents a subdomain of another.
   ///
   /// The domain and subdomain properties are compared to determine if
-  /// this object represents a subdomain of [other]. If [icann] is [true],
+  /// this object represents a subdomain of [other]. If [icann] is `true`,
   /// comparison will be based on only the ICANN/IANA rules.
   ///
   /// For example, `http://images.google.co.uk` is a subdomain of `http://google.co.uk`.
   ///
   /// If [other] has a subdomain and this object represents a subdomain of that,
-  /// [true] is still returned.
+  /// `true` is still returned.
   bool isSubdomainOf(PublicSuffix other, {bool icann = false}) {
     if (icann) {
       return icannDomain == other.icannDomain &&

@@ -19,7 +19,7 @@ class DefaultSuffixRules {
 
   /// Returns the default suffix rules.
   ///
-  /// [null] is returned if the list has not been initialised.
+  /// `null` is returned if the list has not been initialised.
   static SuffixRules? get rules => _rules;
 
   /// Returns the default suffix rules or throws if they haven't
@@ -60,7 +60,7 @@ class DefaultSuffixRules {
 
   /// Disposes of the default rule list.
   ///
-  /// [hasInitialised] will return [false] after this has been called.
+  /// [hasInitialised] will return `false` after this has been called.
   static void dispose() {
     _rules = null;
   }

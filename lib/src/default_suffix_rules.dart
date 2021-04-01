@@ -28,7 +28,7 @@ class DefaultSuffixRules {
     if (hasInitialised()) {
       return rules!;
     } else {
-      throw StateError('PublicSuffixList has not been initialised!');
+      throw StateError('DefaultSuffixRules has not been initialised!');
     }
   }
 

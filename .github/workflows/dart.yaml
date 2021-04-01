@@ -1,0 +1,69 @@
+name: Dart CI
+
+on:
+  push:
+    branches:
+      - master
+      - develop
+      - release-*
+  pull_request:
+    branches:
+      - master
+      - develop
+      - release-*
+
+jobs:
+  test:
+    name: Unit tests
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        dart_sdk: [ 2.12.0, stable ]
+
+    steps:
+      - name: Install Dart
+        uses: dart-lang/setup-dart@v1
+        with:
+          sdk: ${{ matrix.dart_sdk }}
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Install dependencies
+        run: pub get
+      - name: Run tests
+        run: xvfb-run -a pub run test -p vm,chrome --coverage .coverage
+      - name: Format test coverage as LCOV
+        run: pub run coverage:format_coverage --lcov --packages=.packages --report-on lib --in .coverage/ --out .coverage/lcov.info
+      - name: Upload to CodeCov
+        uses: codecov/codecov-action@v1
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          file: ./.coverage/lcov.info
+
+
+  analyse:
+    name: Code analysis
+    runs-on: ubuntu-latest
+
+    container:
+      image:  google/dart:latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Install dependencies
+        run: pub get
+      - name: Run analyser
+        run: dartanalyzer lib test example
+
+  format:
+    name: Code format
+    runs-on: ubuntu-latest
+
+    container:
+      image:  google/dart:latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Check code format
+        run: dartfmt -n --set-exit-if-changed .

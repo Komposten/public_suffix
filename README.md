@@ -1,6 +1,7 @@
 # public_suffix
 [![pub package](https://img.shields.io/pub/v/public_suffix.svg)](https://pub.dev/packages/public_suffix)
 [![Dart CI](https://github.com/Komposten/public_suffix/actions/workflows/dart.yaml/badge.svg)](https://github.com/Komposten/public_suffix/actions/workflows/dart.yaml)
+[![codecov](https://codecov.io/gh/Komposten/public_suffix/branch/master/graph/badge.svg)](https://codecov.io/gh/Komposten/public_suffix)
 
 **A domain parser based on the [Public Suffix List](https://publicsuffix.org/)**
 

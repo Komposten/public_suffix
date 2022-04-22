@@ -45,7 +45,7 @@ jobs:
     runs-on: ubuntu-latest
 
     container:
-      image:  google/dart:latest
+      image: dart:latest
 
     steps:
       - name: Checkout
@@ -60,7 +60,7 @@ jobs:
     runs-on: ubuntu-latest
 
     container:
-      image:  google/dart:latest
+      image: dart:latest
 
     steps:
       - name: Checkout

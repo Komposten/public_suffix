@@ -53,7 +53,7 @@ jobs:
       - name: Install dependencies
         run: pub get
       - name: Run analyser
-        run: dartanalyzer lib test example
+        run: dart analyze lib test example
 
   format:
     name: Code format
@@ -66,4 +66,4 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
       - name: Check code format
-        run: dartfmt -n --set-exit-if-changed .
+        run: dart format --output none --set-exit-if-changed .

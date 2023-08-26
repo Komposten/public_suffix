@@ -81,7 +81,7 @@ There are two ways of initialising it:
    import 'package:public_suffix/io_helper.dart';
    
    main() async {
-     var uri = Uri.parse('https://publicsuffix.org/list/public_suffix_list.dat');
+     var listUri = Uri.parse('https://publicsuffix.org/list/public_suffix_list.dat');
      await SuffixRulesHelper.initDefaultListFromUri(listUri);
    }
    ```
